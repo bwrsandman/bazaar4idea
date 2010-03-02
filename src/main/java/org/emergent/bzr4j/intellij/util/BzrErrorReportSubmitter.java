@@ -268,7 +268,7 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
 
   public static class ErrorReportSender {
 
-    private static final String SMTP_HOST_NAME = "smtp.easydns.com";
+    private static final String DEFAULT_SMTP_SERVER = "smtp.easydns.com";
 
     private static final String SMTP_RECIPIENT = "bugreport@emergent.org";
 
@@ -346,7 +346,10 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
       props.put("mail.transport.protocol", "smtp");
 //      props.put("mail.smtp.host", SMTP_HOST_NAME);
       String localFqdn = getLocalFqdn();
-      props.put("mail.smtp.host", notifierBean.getSmtpServer());
+      String smtpServer = notifierBean.getSmtpServer();
+      if (smtpServer == null || "".equals(smtpServer.trim()))
+        smtpServer = DEFAULT_SMTP_SERVER;
+      props.put("mail.smtp.host", smtpServer);
       LOG.debug("localFqdn: " + localFqdn);
       props.put("mail.smtp.localhost", localFqdn);
       Authenticator auth = null;

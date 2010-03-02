@@ -62,8 +62,7 @@ public class BzrSendErrorForm extends DialogWrapper {
   private boolean myShouldSend = false;
 
   private void validateSendable() {
-    if ((myItnServerTextField.getText().trim().length() > 0)
-        && EMAIL_VALIDATION_PATTERN.matcher(myItnEmailTextField.getText()).find()) {
+    if (EMAIL_VALIDATION_PATTERN.matcher(myItnEmailTextField.getText()).find()) {
       mySendAction.setEnabled(true);
     } else {
       mySendAction.setEnabled(false);
