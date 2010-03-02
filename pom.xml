@@ -137,8 +137,8 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/jarbundle.xml</descriptor>
-            <!--<descriptor>src/main/assembly/zipbundle.xml</descriptor>-->
+            <!--<descriptor>src/main/assembly/jarbundle.xml</descriptor>-->
+            <descriptor>src/main/assembly/zipbundle.xml</descriptor>
           </descriptors>
           <outputDirectory>${project.build.directory}/install-bundles</outputDirectory>
         </configuration>
@@ -165,14 +165,14 @@
                     <include name="${project.artifactId}*"/>
                   </fileset>
                 </delete>
+<!--
                 <copy overwrite="true" verbose="true" preservelastmodified="true"
                       file="${project.build.directory}/install-bundles/${project.artifactId}-jarbundle.jar"
                       tofile="${idea.plugins.dir}/${project.artifactId}.jar"/>
-<!--
+-->
                 <copy todir="${idea.plugins.dir}" preservelastmodified="true">
                   <zipfileset src="${project.build.directory}/install-bundles/bzr4intellij-zipbundle.zip"/>
                 </copy>
--->
               </tasks>
             </configuration>
             <goals>

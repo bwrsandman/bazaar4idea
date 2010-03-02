@@ -10,17 +10,15 @@
   <dependencySets>
     <dependencySet>
       <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-      <!--<outputFileNameMapping>${artifact.build.finalName}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>-->
       <unpack>false</unpack>
       <scope>runtime</scope>
       <outputDirectory>lib</outputDirectory>
       <includes>
-        <include>org.emergent.bzr4j:bzr4j-core</include>
         <include>org.emergent.bzr4j:bzr4intellij</include>
+        <include>org.emergent.bzr4j:bzr4j-core</include>
         <include>org.apache.commons:commons-io</include>
         <include>javax.mail:mail</include>
         <include>javax.activation:activation</include>
-        <!--<include>commons-net:commons-net</include>-->
       </includes>
     </dependencySet>
   </dependencySets>

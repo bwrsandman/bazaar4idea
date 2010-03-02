@@ -16,7 +16,6 @@
         <include>org.apache.commons:commons-io</include>
         <include>javax.mail:mail</include>
         <include>javax.activation:activation</include>
-        <!--<include>commons-net:commons-net</include>-->
       </includes>
     </dependencySet>
   </dependencySets>
