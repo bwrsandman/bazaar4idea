@@ -29,6 +29,7 @@ import com.intellij.openapi.vcs.changes.VcsDirtyScope;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.core.BazaarRoot;
+import org.emergent.bzr4j.core.cli.BzrExecException;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import org.emergent.bzr4j.intellij.BzrContentRevision;
@@ -37,14 +38,14 @@ import org.emergent.bzr4j.intellij.BzrUtil;
 import org.emergent.bzr4j.intellij.command.BzrIdeaExec;
 import org.emergent.bzr4j.intellij.command.BzrMiscCommand;
 import org.emergent.bzr4j.intellij.command.ShellCommandService;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class BzrChangeProvider implements ChangeProvider {
 
@@ -70,22 +71,26 @@ public class BzrChangeProvider implements ChangeProvider {
       ProgressIndicator progress,
       ChangeListManagerGate addGate) throws VcsException {
 
-    VcsContextFactory vcsCtxFac = VcsContextFactory.SERVICE.getInstance();
+    try {
+      VcsContextFactory vcsCtxFac = VcsContextFactory.SERVICE.getInstance();
 
-    Map<File,BzrRevisionNumber> rootRevnos = new LinkedHashMap<File,BzrRevisionNumber>();
+      Map<File,BzrRevisionNumber> rootRevnos = new LinkedHashMap<File,BzrRevisionNumber>();
 
-    Map<VirtualFile,FilePath> rootsMap = new HashMap<VirtualFile, FilePath>();
+      Map<VirtualFile,FilePath> rootsMap = new HashMap<VirtualFile, FilePath>();
 
-    for (FilePath filePath : dirtyScope.getRecursivelyDirtyDirectories()) {
-      mergePaths(vcsCtxFac, rootsMap, filePath);
-    }
+      for (FilePath filePath : dirtyScope.getRecursivelyDirtyDirectories()) {
+        mergePaths(vcsCtxFac, rootsMap, filePath);
+      }
 
-    for (FilePath filePath : dirtyScope.getDirtyFiles()) {
-      mergePaths(vcsCtxFac, rootsMap, filePath);
-    }
+      for (FilePath filePath : dirtyScope.getDirtyFiles()) {
+        mergePaths(vcsCtxFac, rootsMap, filePath);
+      }
 
-    for (Map.Entry<VirtualFile,FilePath> rootEntry : rootsMap.entrySet()) {
-      process(builder, rootEntry.getKey(), rootEntry.getValue(), rootRevnos);
+      for (Map.Entry<VirtualFile,FilePath> rootEntry : rootsMap.entrySet()) {
+        process(builder, rootEntry.getKey(), rootEntry.getValue(), rootRevnos);
+      }
+    } catch (BzrExecException e) {
+      throw new VcsException(e);
     }
   }
 
@@ -121,87 +126,73 @@ public class BzrChangeProvider implements ChangeProvider {
       ChangelistBuilder builder,
       VirtualFile vcsVirtualRoot,
       FilePath filePath,
-      Map<File, BzrRevisionNumber> processedRoots) {
+      Map<File, BzrRevisionNumber> processedRoots) throws BzrExecException {
 
     if (filePath.isNonLocal()) {
       CHANGES.debug("no processing (nonlocal path): " + String.valueOf(filePath));
       return;
     }
 
+    File target = filePath.getIOFile();
+    BazaarRoot bzrRoot = BazaarRoot.findBranchLocation(target);
 
-    Set<File> ignoredSet = new TreeSet<File>();
-    final File bzrRoot = collectIgnored(ignoredSet, filePath);
     if (bzrRoot == null) {
       CHANGES.debug("no processing (no io root): " + String.valueOf(filePath));
       return;
     }
 
+    final File ioRoot = bzrRoot.getFile();
+
+    final String relpath = target.equals(ioRoot) ? null : BzrUtil.relativePath(ioRoot,target);
+
     CHANGES.debug("is processing: " + String.valueOf(filePath));
 
-    for (File ignored : ignoredSet) {
-      IGNORED.debug(String.format("%10s \"%s\"", "ignored", ignored));
-        builder.processIgnoredFile(VcsUtil.getVirtualFile(ignored));
-    }
-
-    BzrRevisionNumber revno = processedRoots.get(bzrRoot);
+    BzrRevisionNumber revno = processedRoots.get(ioRoot);
     if (revno == null) {
       revno = BzrMiscCommand.revno(m_project,vcsVirtualRoot);
-      processedRoots.put(bzrRoot,revno);
+      processedRoots.put(ioRoot,revno);
     }
+
+    final ShellCommandService service = ShellCommandService.getInstance(m_project);
+
+    MyIgnoredHandler ignoredHandler = new MyIgnoredHandler(builder, ioRoot);
+
+    BzrIdeaExec ignoredExec = new BzrIdeaExec(bzrRoot, "xmlls");
+    ignoredExec.addArguments("--ignored");
+    if (relpath != null)
+      ignoredExec.addArguments(relpath);
+    service.executeUnsafe(ignoredExec, BzrXmlResult.createBzrXmlResult(ignoredHandler));
+
+
     MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, revno);
-    collectChanges(statusHandler, filePath);
+
+    BzrIdeaExec statusExec = new BzrIdeaExec(bzrRoot, "xmlstatus");
+    if (relpath != null)
+      statusExec.addArguments(relpath);
+    service.executeUnsafe(statusExec, BzrXmlResult.createBzrXmlResult(statusHandler));
   }
 
-  private File collectIgnored(final Set<File> retval, FilePath filePath) {
-    File target = filePath.getIOFile();
-    final File bzrRoot = BzrUtil.findBzrRoot(target);
+  private class MyIgnoredHandler extends XmlOutputHandler {
 
-    if (bzrRoot == null) {
-      return null;
+    private ChangelistBuilder m_builder;
+    private File m_bzrRoot;
+
+    public MyIgnoredHandler(ChangelistBuilder builder, File bzrRoot) {
+      m_builder = builder;
+      m_bzrRoot = bzrRoot;
     }
 
-    final String relpath = target.equals(bzrRoot) ? null : BzrUtil.relativePath(bzrRoot,target);
-
-    final ShellCommandService service = ShellCommandService.getInstance(m_project);
-    BzrIdeaExec handler = new BzrIdeaExec(BazaarRoot.findBranchLocation(target), "xmlls");
-    handler.addArguments("--ignored");
-    if (relpath != null)
-      handler.addArguments(relpath);
-
-    XmlOutputHandler resultHandler = new XmlOutputHandler() {
-      @Override
-      public void handleItem(String id, String kind, String path, String statusKind) {
-        File ioFile = new File(bzrRoot, path);
-        retval.add(ioFile);
-      }
-    };
-
-    service.execute(handler, BzrXmlResult.createBzrXmlResult(resultHandler));
-    return bzrRoot;
-  }
-
-  private File collectChanges(MyStatusHandler statusHandler, FilePath filePath) {
-    File target = filePath.getIOFile();
-    final File bzrRoot = BzrUtil.findBzrRoot(target);
-    if (bzrRoot == null) {
-      return null;
+    @Override
+    public void handleItem(String id, String kind, String path, String statusKind) {
+      File ignored = new File(m_bzrRoot, path);
+      IGNORED.debug(String.format("%10s \"%s\"", "ignored", ignored));
+      m_builder.processIgnoredFile(VcsUtil.getVirtualFile(ignored));
     }
 
-    final String relpath = target.equals(bzrRoot) ? null : BzrUtil.relativePath(bzrRoot,target);
-
-//    VirtualFile repo = VcsUtil.getVcsRootFor(m_project, filePath);
-//
-//    if (repo == null) {
-//      return null;
-//    }
-
-    BzrIdeaExec handler = new BzrIdeaExec(BazaarRoot.findBranchLocation(target), "xmlstatus");
-    if (relpath != null)
-      handler.addArguments(relpath);
-
-    final ShellCommandService service = ShellCommandService.getInstance(m_project);
-    service.execute(handler, BzrXmlResult.createBzrXmlResult(statusHandler));
-    return bzrRoot;
+    @Override
+    public void fatalError(SAXParseException e) throws SAXException {
+      LOG.warn(e, "sax error");
+    }
   }
 
   private class MyStatusHandler extends XmlOutputHandler {
@@ -285,6 +276,11 @@ public class BzrChangeProvider implements ChangeProvider {
     public void handleKindChanged(String kind, String path, String oldKind) {
       CHANGES.debug(String.format("%10s \"%s\"", "kind_change", path));
       super.handleKindChanged(kind, path, oldKind);
+    }
+
+    @Override
+    public void fatalError(SAXParseException e) throws SAXException {
+      LOG.warn(e, "sax error");
     }
   }
 }
