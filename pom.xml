@@ -1,0 +1,280 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.emergent.bzr4j</groupId>
+  <artifactId>bzr4intellij</artifactId>
+  <version>2.3.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>Bzr4IntelliJ Plugin</name>
+  <url>http://launchpad.net/bzr4j</url>
+
+  <properties>
+    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+    <idea.sdk.version>93.94</idea.sdk.version>
+    <idea.sdk.dir>${env.BZR4J_IDEA_SDK_DIR}</idea.sdk.dir>
+  </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>internal-releases</id>
+      <name>Internal Releases</name>
+      <url>${internal.release.repo.url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>internal-snapshots</id>
+      <name>Internal Snapshots</name>
+      <url>${internal.snapshot.repo.url}</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.emergent.bzr4j</groupId>
+      <artifactId>bzr4j-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>annotations</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/annotations.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>extensions</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/extensions.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>javac2</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/javac2.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>openapi</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/openapi.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>util</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/util.jar</systemPath>
+    </dependency>
+
+    <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.jdom</groupId>
+        <artifactId>jdom</artifactId>
+        <version>1.1</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.3.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
+        <version>1.4.1</version>
+    </dependency>
+
+    <dependency>
+        <groupId>javax.activation</groupId>
+        <artifactId>activation</artifactId>
+        <version>1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <classifier>jdk15</classifier>
+      <version>5.8</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>${javac.target.level}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/jarbundle.xml</descriptor>
+            <!--<descriptor>src/main/assembly/zipbundle.xml</descriptor>-->
+          </descriptors>
+          <outputDirectory>${project.build.directory}/install-bundles</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <configuration>
+              <tasks if="idea.plugins.dir">
+                <delete quiet="true" includeemptydirs="true">
+                  <fileset dir="${idea.plugins.dir}">
+                    <include name="${project.artifactId}/**"/>
+                    <include name="${project.artifactId}*"/>
+                  </fileset>
+                </delete>
+                <copy overwrite="true" verbose="true" preservelastmodified="true"
+                      file="${project.build.directory}/install-bundles/${project.artifactId}-jarbundle.jar"
+                      tofile="${idea.plugins.dir}/${project.artifactId}.jar"/>
+<!--
+                <copy todir="${idea.plugins.dir}" preservelastmodified="true">
+                  <zipfileset src="${project.build.directory}/install-bundles/bzr4intellij-zipbundle.zip"/>
+                </copy>
+-->
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>META-INF</directory>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.3</version>
+        <configuration>
+          <excludedGroups>broken</excludedGroups>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <systemProperties>
+            <property>
+              <name>bzr4j.log4j.config.default</name>
+              <value>true</value>
+            </property>
+          </systemProperties>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-idea-plugin</artifactId>
+        <version>2.3-bzr4j</version>
+        <configuration>
+          <jdkName>IDEA_SDK</jdkName>
+          <jdkLevel>1.5</jdkLevel>
+          <exclude>target</exclude>
+          <downloadSources>true</downloadSources>
+          <ideaPlugin>true</ideaPlugin>
+          <libraries>
+            <library>
+              <name>annotations</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>extensions</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>javac2</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>openapi</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>util</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>commons-codec</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>commons-lang</name>
+              <exclude>true</exclude>
+            </library>
+            <library>
+              <name>jdom</name>
+              <exclude>true</exclude>
+            </library>
+          </libraries>
+        </configuration>
+      </plugin>
+    </plugins>
+    <finalName>${project.artifactId}</finalName>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>bzr4intellij-jdk15</id>
+      <activation>
+        <jdk>1.5</jdk>
+      </activation>
+      <properties>
+        <javac.target.level>1.5</javac.target.level>
+      </properties>
+    </profile>
+    <profile>
+      <id>bzr4intellij-jdk16</id>
+      <activation>
+        <jdk>[1.6,)</jdk>
+      </activation>
+      <properties>
+        <javac.target.level>1.6</javac.target.level>
+      </properties>
+    </profile>
+  </profiles>
+
+</project>

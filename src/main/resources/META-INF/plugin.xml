@@ -1,0 +1,115 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin url="http://launchpad.net/bzr4j">
+  <name>Bzr4IntelliJ</name>
+  <id>bzr4intellij</id>
+  <description>Provides integration with Bazaar version control system</description>
+  <version>2.3.0-SNAPSHOT</version>
+  <description>
+  <![CDATA[
+  <b>IntelliJ IDEA</b> plugin for Bazaar integration.<br>
+  <p>
+  System Requirements:
+  <ul>
+    <li>IntelliJ IDEA 9.0+ (Ultimate or Community)
+    <li>Java 5+
+    <li>Bazaar 2.0+
+    <ul>
+      <li>xmloutput plugin
+    </ul>
+  </ul>
+  ]]>
+  </description>
+  <category>VCS Integration</category>
+  <vendor url="http://emergent.org/" logo="/org/emergent/bzr4j/intellij/bzr.png" email="patrick@woodworth.org">Patrick Woodworth</vendor>
+  <idea-version since-build="91.13"/>
+
+  <depends>com.intellij.modules.vcs</depends>
+
+  <actions>
+<!--
+    <action id="bzr4intellij.triggerError" class="org.emergent.bzr4j.intellij.action.TriggerExceptionAction"
+            text="Trigger Error" description="Triggers an error">
+      <add-to-group group-id="VcsHistoryActionsGroup" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt G"/>
+    </action>
+-->
+    <group id="bzr4intellij.file.menu" class="org.emergent.bzr4j.intellij.action.BzrGroup"
+           popup="true" icon="/org/emergent/bzr4j/intellij/bzr.png">
+      <action id="bzr4intellij.add" class="org.emergent.bzr4j.intellij.action.AddAction"/>
+      <action id="bzr4intellij.resolve.merge" class="org.emergent.bzr4j.intellij.action.ResolveAction"/>
+      <action id="bzr4intellij.resolve.mark" class="org.emergent.bzr4j.intellij.action.BzrMarkResolved"/>
+      <separator/>
+      <reference id="CheckinFiles"/>
+      <reference id="Annotate"/>
+      <reference id="Compare.SameVersion"/>
+      <reference id="Compare.LastVersion"/>
+      <reference id="Compare.Selected"/>
+      <reference id="Vcs.ShowTabbedFileHistory"/>
+      <reference id="Vcs.ShowHistoryForBlock"/>
+      <reference id="CheckStatusForFiles"/>
+      <reference id="ChangesView.Rollback"/>
+      <add-to-group group-id="VcsGroup" anchor="last"/>
+    </group>
+    <group id="bzr4intellij.global.submenu" class="org.emergent.bzr4j.intellij.action.BzrGroupX"
+           popup="true" icon="/org/emergent/bzr4j/intellij/bzr.png">
+      <action id="bzr4intellij.run.conflict.resolver" class="org.emergent.bzr4j.intellij.action.BzrRunConflictResolverAction"/>
+      <action id="bzr4intellij.pull" class="org.emergent.bzr4j.intellij.action.BzrPullAction"/>
+      <action id="bzr4intellij.push" class="org.emergent.bzr4j.intellij.action.BzrPushAction"/>
+      <action id="bzr4intellij.tag" class="org.emergent.bzr4j.intellij.action.BzrCreateTagAction"/>
+      <add-to-group group-id="VcsGlobalGroup" anchor="last"/>
+    </group>
+  </actions>
+
+  <application-components>
+    <component>
+      <implementation-class>org.emergent.bzr4j.intellij.BzrGlobalSettings</implementation-class>
+    </component>
+    <component>
+      <implementation-class>org.emergent.bzr4j.intellij.BzrIdeConfigurable</implementation-class>
+    </component>
+    <component>
+      <implementation-class>org.emergent.bzr4j.intellij.util.BzrErrorReportConfigurable</implementation-class>
+      <interface-class>org.emergent.bzr4j.intellij.util.BzrErrorReportConfigurable</interface-class>
+    </component>
+  </application-components>
+  <project-components>
+    <component>
+      <implementation-class>org.emergent.bzr4j.intellij.command.ShellCommandService</implementation-class>
+    </component>
+    <component>
+      <implementation-class>org.emergent.bzr4j.intellij.BzrProjectSettings</implementation-class>
+    </component>
+  </project-components>
+  <resource-bundle>org.emergent.bzr4j.intellij.BzrVcsMessages</resource-bundle>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <vcs name="Bazaar" vcsClass="org.emergent.bzr4j.intellij.BzrVcs"/>
+    <errorHandler implementation="org.emergent.bzr4j.intellij.util.BzrErrorReportSubmitter"/>
+  </extensions>
+
+  <change-notes>
+  <![CDATA[
+  <h3>Changes since 2.1.1</h3>
+  <ul>
+    <li>[feature] Built-in error reporting.
+    <li>[feature] Auto-correction of misconfigured roots.
+    <li>[enhancement] Various improvements throughout.
+  </ul>
+  <h3>Changes since 2.1.0</h3>
+  <ul>
+    <li>[bugfix] Suppress inappropriate error dialog popups when invoking commit or rename actions.
+  </ul>
+  <h3>Changes since 2.0.0</h3>
+  <ul>
+    <li>[enhancement] Better integration with IDEA due to revamp based on the hg4idea plugin (thanks Victor!)
+    <li>[bugfix] Plays nicer with IntelliJ's builtin shelving capabilities.
+    <li>[bugfix] Plays nicer in projects with a heterogeneous VCS configuration.
+  </ul>
+  <h3>Changes since 1.1.9</h3>
+  <ul>
+    <li>[feature] Supports IntelliJ IDEA 9.0
+  </ul>
+  ]]>
+  </change-notes>
+
+</idea-plugin>
