@@ -164,7 +164,7 @@ public class BzrChangeProvider implements ChangeProvider {
     service.executeUnsafe(ignoredExec, BzrXmlResult.createBzrXmlResult(ignoredHandler));
 
 
-    MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, revno);
+    MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, ioRoot, revno);
 
     BzrIdeaExec statusExec = new BzrIdeaExec(bzrRoot, "xmlstatus");
     if (relpath != null)
@@ -200,11 +200,18 @@ public class BzrChangeProvider implements ChangeProvider {
     private ChangelistBuilder m_builder;
     private BzrRevisionNumber m_bzrRev;
     private VirtualFile m_vcsRoot;
+    private File m_bzrRoot;
 
-    public MyStatusHandler(VirtualFile vcsRoot, ChangelistBuilder builder, BzrRevisionNumber bzrRev) {
+    public MyStatusHandler(VirtualFile vcsRoot, ChangelistBuilder builder, File bzrRoot, BzrRevisionNumber bzrRev) {
       m_vcsRoot = vcsRoot;
       m_builder = builder;
+      m_bzrRoot = bzrRoot;
       m_bzrRev = bzrRev;
+    }
+
+    @Override
+    public File getWorkDir() {
+      return m_bzrRoot;
     }
 
     @Override
