@@ -2,7 +2,7 @@
 <idea-plugin url="http://launchpad.net/bzr4j">
   <name>Bzr4IntelliJ</name>
   <id>bzr4intellij</id>
-  <version>2.3.1-SNAPSHOT</version>
+  <version>${project.version}</version>
   <description>
   <![CDATA[
   <b>IntelliJ IDEA</b> plugin for Bazaar VCS integration.<br>
