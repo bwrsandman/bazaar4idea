@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The component tracks Bzr roots for the project. If roots are mapped incorrectly it
@@ -91,6 +92,8 @@ public class BzrRootTracker implements VcsListener {
    * If true, the notification is currently active and has not been dismissed yet.
    */
   private final AtomicBoolean myNotificationPosted = new AtomicBoolean(false);
+
+  private final AtomicReference<FixedRoots> m_cachedFixes = new AtomicReference<FixedRoots>();    
 
   private final MergingUpdateQueue myQueue;
 
@@ -283,6 +286,8 @@ public class BzrRootTracker implements VcsListener {
       clearRootsNotification();
     }
     else if (myNotificationPosted.compareAndSet(false, true)) {
+      final List<VcsDirectoryMapping> vcsDirectoryMappings = new ArrayList<VcsDirectoryMapping>(myVcsManager.getDirectoryMappings());
+      calculateNewRoots(vcsDirectoryMappings);
       UIUtil.invokeLaterIfNeeded(new Runnable() {
         public void run() {
           myNotification = new Notification(BZR_INVALID_ROOTS_ID,
@@ -290,8 +295,7 @@ public class BzrRootTracker implements VcsListener {
               BzrVcsMessages.message("root.tracker.message"),
               NotificationType.ERROR,
               new NotificationListener() {
-                public void hyperlinkUpdate(@NotNull Notification notification,
-                                            @NotNull HyperlinkEvent event) {
+                public void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
                   if (fixRoots()) {
                     notification.expire();
                   }
@@ -352,17 +356,28 @@ public class BzrRootTracker implements VcsListener {
   }
 
   /**
-   * Fix mapped roots
-   *
-   * @return true if roots now in the correct state
+   * Calculate fix mapped roots
+   * @param vcsDirectoryMappings
    */
-  boolean fixRoots() {
-    final List<VcsDirectoryMapping> vcsDirectoryMappings = new ArrayList<VcsDirectoryMapping>(myVcsManager.getDirectoryMappings());
-    final HashSet<String> mapped = new HashSet<String>();
-    final HashSet<String> removed = new HashSet<String>();
-    final HashSet<String> added = new HashSet<String>();
+  private FixedRoots calculateNewRoots(final List<VcsDirectoryMapping> vcsDirectoryMappings) {
     final VirtualFile baseDir = myProject.getBaseDir();
     assert baseDir != null;
+
+    FixedRoots fixedRoots = m_cachedFixes.get();
+    if (fixedRoots != null && fixedRoots.m_rootsHashCode == vcsDirectoryMappings.hashCode()) {
+      return fixedRoots;
+    }
+
+    if (fixedRoots != null && fixedRoots.m_rootsHashCode != vcsDirectoryMappings.hashCode()) {
+      LOG.debug("outdated hashcode");
+    }
+
+    fixedRoots = new FixedRoots(vcsDirectoryMappings.hashCode());
+
+    final HashSet<String> mapped = fixedRoots.mapped;
+    final HashSet<String> removed = fixedRoots.removed;
+    final HashSet<String> added = fixedRoots.added;
+
     ApplicationManager.getApplication().runReadAction(new Runnable() {
       public void run() {
         for (Iterator<VcsDirectoryMapping> i = vcsDirectoryMappings.iterator(); i.hasNext();) {
@@ -424,6 +439,26 @@ public class BzrRootTracker implements VcsListener {
         }
       }
     });
+
+    m_cachedFixes.set(fixedRoots);
+    return fixedRoots;
+  }
+
+  /**
+   * Fix mapped roots
+   *
+   * @return true if roots now in the correct state
+   */
+  boolean fixRoots() {
+    final VirtualFile baseDir = myProject.getBaseDir();
+    assert baseDir != null;
+
+    final List<VcsDirectoryMapping> vcsDirectoryMappings = new ArrayList<VcsDirectoryMapping>(myVcsManager.getDirectoryMappings());
+    final FixedRoots fixedRoots = calculateNewRoots(vcsDirectoryMappings);
+    final HashSet<String> mapped = fixedRoots.mapped;
+    final HashSet<String> removed = fixedRoots.removed;
+    final HashSet<String> added = fixedRoots.added;
+
     if (added.isEmpty() && removed.isEmpty()) {
       Messages.showInfoMessage(myProject,
           BzrVcsMessages.message("fix.roots.valid.message"), BzrVcsMessages.message("fix.roots.valid.title"));
@@ -499,6 +534,17 @@ public class BzrRootTracker implements VcsListener {
    */
   private void invalidate() {
     myRootsInvalidated.set(true);
+  }
+
+  private class FixedRoots {
+    public final HashSet<String> mapped = new HashSet<String>();
+    public final HashSet<String> removed = new HashSet<String>();
+    public final HashSet<String> added = new HashSet<String>();
+    public final int m_rootsHashCode;
+
+    public FixedRoots(int rootsHashCode) {
+      m_rootsHashCode = rootsHashCode;
+    }
   }
 
   /**
