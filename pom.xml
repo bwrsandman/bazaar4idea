@@ -17,25 +17,20 @@
     <idea.sdk.dir>${env.BZR4J_IDEA_SDK_DIR}</idea.sdk.dir>
   </properties>
 
-  <distributionManagement>
-    <repository>
-      <id>internal-releases</id>
-      <name>Internal Releases</name>
-      <url>${internal.release.repo.url}</url>
-    </repository>
-    <snapshotRepository>
-      <id>internal-snapshots</id>
-      <name>Internal Snapshots</name>
-      <url>${internal.snapshot.repo.url}</url>
-    </snapshotRepository>
-  </distributionManagement>
-
   <dependencies>
 
     <dependency>
       <groupId>org.emergent.bzr4j</groupId>
       <artifactId>bzr4j-core</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jetbrains.intellij</groupId>
+      <artifactId>idea</artifactId>
+      <version>${idea.sdk.version}</version>
+      <scope>system</scope>
+      <systemPath>${idea.sdk.dir}/lib/idea.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -235,6 +230,10 @@
           <downloadSources>true</downloadSources>
           <ideaPlugin>true</ideaPlugin>
           <libraries>
+            <library>
+              <name>idea</name>
+              <exclude>true</exclude>
+            </library>
             <library>
               <name>annotations</name>
               <exclude>true</exclude>

@@ -93,7 +93,7 @@ public class BzrRootTracker implements VcsListener {
    */
   private final AtomicBoolean myNotificationPosted = new AtomicBoolean(false);
 
-  private final AtomicReference<FixedRoots> m_cachedFixes = new AtomicReference<FixedRoots>();    
+  private final AtomicReference<FixedRoots> m_cachedFixes = new AtomicReference<FixedRoots>();
 
   private final MergingUpdateQueue myQueue;
 

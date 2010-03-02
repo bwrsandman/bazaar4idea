@@ -34,27 +34,34 @@
 -->
     <group id="bzr4intellij.file.menu" class="org.emergent.bzr4j.intellij.action.BzrGroup"
            popup="true" icon="/org/emergent/bzr4j/intellij/bzr.png">
-      <action id="bzr4intellij.add" class="org.emergent.bzr4j.intellij.action.AddAction"/>
-      <action id="bzr4intellij.resolve.merge" class="org.emergent.bzr4j.intellij.action.ResolveAction"/>
-      <action id="bzr4intellij.resolve.mark" class="org.emergent.bzr4j.intellij.action.BzrMarkResolved"/>
+      <action id="bzr4intellij.add" class="org.emergent.bzr4j.intellij.action.AddAction"
+              text="Add"/>
+      <action id="bzr4intellij.resolve.merge" class="org.emergent.bzr4j.intellij.action.ResolveAction"
+              text="Resolve Conflict"/>
+      <action id="bzr4intellij.resolve.mark" class="org.emergent.bzr4j.intellij.action.BzrMarkResolved"
+              text="Mark as Resolved"/>
       <separator/>
-      <reference id="CheckinFiles"/>
-      <reference id="Annotate"/>
-      <reference id="Compare.SameVersion"/>
-      <reference id="Compare.LastVersion"/>
-      <reference id="Compare.Selected"/>
-      <reference id="Vcs.ShowTabbedFileHistory"/>
-      <reference id="Vcs.ShowHistoryForBlock"/>
-      <reference id="CheckStatusForFiles"/>
-      <reference id="ChangesView.Rollback"/>
+      <reference ref="CheckinFiles"/>
+      <reference ref="Annotate"/>
+      <reference ref="Compare.SameVersion"/>
+      <reference ref="Compare.LastVersion"/>
+      <reference ref="Compare.Selected"/>
+      <reference ref="Vcs.ShowTabbedFileHistory"/>
+      <reference ref="Vcs.ShowHistoryForBlock"/>
+      <reference ref="CheckStatusForFiles"/>
+      <reference ref="ChangesView.Rollback"/>
       <add-to-group group-id="VcsGroup" anchor="last"/>
     </group>
     <group id="bzr4intellij.global.submenu" class="org.emergent.bzr4j.intellij.action.BzrGroupX"
            popup="true" icon="/org/emergent/bzr4j/intellij/bzr.png">
-      <action id="bzr4intellij.run.conflict.resolver" class="org.emergent.bzr4j.intellij.action.BzrRunConflictResolverAction"/>
-      <action id="bzr4intellij.pull" class="org.emergent.bzr4j.intellij.action.BzrPullAction"/>
-      <action id="bzr4intellij.push" class="org.emergent.bzr4j.intellij.action.BzrPushAction"/>
-      <action id="bzr4intellij.tag" class="org.emergent.bzr4j.intellij.action.BzrCreateTagAction"/>
+      <action id="bzr4intellij.run.conflict.resolver" class="org.emergent.bzr4j.intellij.action.BzrRunConflictResolverAction"
+              text="Run Conflict Resolver"/>
+      <action id="bzr4intellij.pull" class="org.emergent.bzr4j.intellij.action.BzrPullAction"
+              text="Pull Changesets..."/>
+      <action id="bzr4intellij.push" class="org.emergent.bzr4j.intellij.action.BzrPushAction"
+              text="Push Changesets..."/>
+      <action id="bzr4intellij.tag" class="org.emergent.bzr4j.intellij.action.BzrCreateTagAction"
+              text="Tag Repository"/>
       <add-to-group group-id="VcsGlobalGroup" anchor="last"/>
     </group>
   </actions>
