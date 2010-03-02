@@ -17,8 +17,9 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.history.FileHistoryPanel;
 import com.intellij.openapi.vcs.history.HistoryAsTreeProvider;
+import com.intellij.openapi.vcs.history.VcsAbstractHistorySession;
+import com.intellij.openapi.vcs.history.VcsAppendableHistorySessionPartner;
 import com.intellij.openapi.vcs.history.VcsDependentHistoryComponents;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsHistoryProvider;
@@ -28,13 +29,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.intellij.BzrFile;
-import org.emergent.bzr4j.intellij.BzrFileRevision;
 import org.emergent.bzr4j.intellij.command.BzrLogCommand;
 import org.emergent.bzr4j.intellij.command.BzrMiscCommand;
-import org.emergent.bzr4j.intellij.command.BzrWorkingCopyRevisionsCommand;
 
 import javax.swing.*;
-import java.util.LinkedList;
 import java.util.List;
 
 public class BzrHistoryProvider implements VcsHistoryProvider {
@@ -54,8 +52,15 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
     return VcsDependentHistoryComponents.createOnlyColumns(new ColumnInfo[0]);
   }
 
-  public AnAction[] getAdditionalActions(FileHistoryPanel panel) {
+  public AnAction[] getAdditionalActions(Runnable runnable) {
     return new AnAction[0];
+  }
+
+  public void reportAppendableHistory(
+      FilePath filePath, VcsAppendableHistorySessionPartner partner) throws VcsException {
+    // todo make this lazily read the revisions from bzr's output
+    final VcsAbstractHistorySession session = createSessionFor(filePath);
+    partner.reportCreatedEmptySession(session);
   }
 
   public boolean isDateOmittable() {
@@ -66,7 +71,7 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
     return null;
   }
 
-  public VcsHistorySession createSessionFor(FilePath filePath) throws VcsException {
+  public VcsAbstractHistorySession createSessionFor(FilePath filePath) throws VcsException {
     final VirtualFile vcsRoot = VcsUtil.getVcsRootFor(project, filePath);
     if (vcsRoot == null) {
       return null;
@@ -74,16 +79,16 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
     BzrFile hgFile = new BzrFile(vcsRoot, filePath);
     BzrLogCommand logCommand = new BzrLogCommand(project);
     List<VcsFileRevision> result = logCommand.execute(hgFile, DEFAULT_LIMIT);
-    return new VcsHistorySession(result) {
+    return new VcsAbstractHistorySession(result) {
       @Override
       protected VcsRevisionNumber calcCurrentRevisionNumber() {
         return BzrMiscCommand.revno(project,vcsRoot);
       }
-    };
-  }
 
-  public HistoryAsTreeProvider getTreeHistoryProvider() {
-    return null;
+      public HistoryAsTreeProvider getHistoryAsTreeProvider() {
+        return null;
+      }
+    };
   }
 
   public boolean supportsHistoryForDirectories() {
