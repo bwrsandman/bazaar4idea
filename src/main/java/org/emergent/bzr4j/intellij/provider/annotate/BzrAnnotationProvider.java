@@ -26,8 +26,6 @@ import org.emergent.bzr4j.intellij.command.BzrLogCommand;
 
 public class BzrAnnotationProvider implements AnnotationProvider {
 
-  private static final int DEFAULT_LIMIT = 500;
-
   private final Project project;
 
   public BzrAnnotationProvider(Project project) {
@@ -45,7 +43,7 @@ public class BzrAnnotationProvider implements AnnotationProvider {
     return new BzrAnnotation(
         hgFile,
         hgAnnotateCommand.execute(hgFile),
-        hgLogCommand.execute(hgFile, DEFAULT_LIMIT)
+        hgLogCommand.execute(hgFile)
     );
   }
 

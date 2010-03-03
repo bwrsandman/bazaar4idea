@@ -42,8 +42,6 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
   @SuppressWarnings({ "UnusedDeclaration" })
   private static final Logger LOG = Logger.getInstance(BzrHistoryProvider.class.getName());
 
-  private static final int DEFAULT_LIMIT = 500;
-
   private final Project project;
 
   public BzrHistoryProvider(Project project) {
@@ -79,7 +77,7 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
     partner.reportCreatedEmptySession(createBzrHistorySession(Collections.<VcsFileRevision>emptyList(), vcsRoot));
 
     BzrLogCommand logCommand = new BzrLogCommand(project);
-    logCommand.execute(bzrFile, DEFAULT_LIMIT, new Consumer<VcsFileRevision>() {
+    logCommand.execute(bzrFile, new Consumer<VcsFileRevision>() {
       public void consume(VcsFileRevision revision) {
         partner.acceptRevision(revision);
       }
@@ -94,7 +92,7 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
 
     BzrFile bzrFile = new BzrFile(vcsRoot, filePath);
     BzrLogCommand logCommand = new BzrLogCommand(project);
-    List<VcsFileRevision> revisions = logCommand.execute(bzrFile, DEFAULT_LIMIT);
+    List<VcsFileRevision> revisions = logCommand.execute(bzrFile);
     return createBzrHistorySession(revisions, vcsRoot);
   }
 

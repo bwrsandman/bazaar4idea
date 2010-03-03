@@ -30,16 +30,14 @@ public class BzrLogCommand extends BzrAbstractCommand {
 
   private static final Logger LOG = Logger.getInstance(BzrLogCommand.class.getName());
 
-  private static final int REVISION_INDEX = 0;
-
   public BzrLogCommand(Project project) {
     super(project);
   }
 
-  public final List<VcsFileRevision> execute(final BzrFile bzrFile, int limit) {
+  public final List<VcsFileRevision> execute(final BzrFile bzrFile) {
     final List<VcsFileRevision> revisions = new LinkedList<VcsFileRevision>();
 
-    execute(bzrFile, limit, new Consumer<VcsFileRevision>() {
+    execute(bzrFile, new Consumer<VcsFileRevision>() {
       public void consume(VcsFileRevision revision) {
         revisions.add(revision);
       }
@@ -48,8 +46,8 @@ public class BzrLogCommand extends BzrAbstractCommand {
     return revisions;
   }
 
-  public final void execute(final BzrFile bzrFile, int limit, final Consumer<VcsFileRevision> consumer) {
-    if (limit <= REVISION_INDEX || bzrFile == null || bzrFile.getRepo() == null) {
+  public final void execute(final BzrFile bzrFile, final Consumer<VcsFileRevision> consumer) {
+    if (bzrFile == null || bzrFile.getRepo() == null) {
       return;
     }
 
