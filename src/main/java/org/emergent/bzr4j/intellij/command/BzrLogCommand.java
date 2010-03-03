@@ -15,13 +15,13 @@ package org.emergent.bzr4j.intellij.command;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
+import com.intellij.util.Consumer;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import org.emergent.bzr4j.intellij.BzrFile;
 import org.emergent.bzr4j.intellij.BzrFileRevision;
 import org.emergent.bzr4j.intellij.BzrRevisionNumber;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,31 +36,41 @@ public class BzrLogCommand extends BzrAbstractCommand {
     super(project);
   }
 
-  public final List<VcsFileRevision> execute(final BzrFile hgFile, int limit) {
-    if (limit <= REVISION_INDEX || hgFile == null || hgFile.getRepo() == null) {
-      return Collections.emptyList();
+  public final List<VcsFileRevision> execute(final BzrFile bzrFile, int limit) {
+    final List<VcsFileRevision> revisions = new LinkedList<VcsFileRevision>();
+
+    execute(bzrFile, limit, new Consumer<VcsFileRevision>() {
+      public void consume(VcsFileRevision revision) {
+        revisions.add(revision);
+      }
+    });
+
+    return revisions;
+  }
+
+  public final void execute(final BzrFile bzrFile, int limit, final Consumer<VcsFileRevision> consumer) {
+    if (limit <= REVISION_INDEX || bzrFile == null || bzrFile.getRepo() == null) {
+      return;
     }
 
-    BzrIdeaExec handler = BzrIdeaExec.createBzrIdeaExec(hgFile.getRepo(), "xmllog");
+    BzrIdeaExec handler = BzrIdeaExec.createBzrIdeaExec(bzrFile.getRepo(), "xmllog");
 
-    ShellCommandService hgCommandService = ShellCommandService.getInstance(project);
+    ShellCommandService bzrCommandService = ShellCommandService.getInstance(project);
 
     List<String> arguments = new LinkedList<String>();
-    arguments.add(hgFile.getRelativePath());
+    arguments.add(bzrFile.getRelativePath());
 
     handler.addArguments(arguments);
 
-    final List<VcsFileRevision> revisions = new LinkedList<VcsFileRevision>();
     XmlOutputHandler resultHandler = new XmlOutputHandler() {
       @Override
       public void handleLog(String revno, String committer, String branchNick, Date timestamp, String message) {
         BzrRevisionNumber bzrRev = BzrRevisionNumber.getLocalInstance(revno);
-        revisions.add(new BzrFileRevision(project, hgFile, bzrRev, branchNick, timestamp, committer, message));
+        consumer.consume(new BzrFileRevision(project, bzrFile, bzrRev, branchNick, timestamp, committer, message));
       }
     };
 
-    hgCommandService.execute(handler, BzrXmlResult.createBzrXmlResult(resultHandler));
-    return revisions;
+    bzrCommandService.execute(handler, BzrXmlResult.createBzrXmlResult(resultHandler));
   }
 
 }
