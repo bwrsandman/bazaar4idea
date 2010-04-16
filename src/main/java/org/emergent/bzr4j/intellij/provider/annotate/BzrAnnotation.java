@@ -61,6 +61,10 @@ public class BzrAnnotation implements FileAnnotation {
     return getLineRevisionNumber(lineNumber);
   }
 
+  public boolean revisionsNotEmpty() {
+    return true;
+  }
+
   public void addListener(AnnotationListener listener) {
   }
 
