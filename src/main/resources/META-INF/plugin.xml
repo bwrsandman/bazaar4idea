@@ -98,6 +98,7 @@
   <h3>Changes since 2.4.0</h3>
   <ul>
     <li>[bugfix] <a href="https://launchpad.net/bugs/546925">546925</a>
+    <li>[bugfix] <a href="https://launchpad.net/bugs/582772">582772</a>
   </ul>
   <h3>Changes since 2.3.1</h3>
   <ul>

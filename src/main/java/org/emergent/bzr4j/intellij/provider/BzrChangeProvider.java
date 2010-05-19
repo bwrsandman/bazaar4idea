@@ -171,6 +171,7 @@ public class BzrChangeProvider implements ChangeProvider {
     MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, ioRoot, revno);
 
     BzrIdeaExec statusExec = new BzrIdeaExec(bzrRoot, "xmlstatus");
+    statusExec.setStderrValidationEnabled(false);
     if (relpath != null)
       statusExec.addArguments(relpath);
     service.executeUnsafe(statusExec, BzrXmlResult.createBzrXmlResult(statusHandler));
