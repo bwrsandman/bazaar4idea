@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 abstract class BzrRevisionsCommand {
 
@@ -43,7 +44,7 @@ abstract class BzrRevisionsCommand {
   private static final int MESSAGE_INDEX = 5;
   private static final int ITEM_COUNT = 6;
 
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm Z");
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm Z", Locale.US);
 
   private final Project project;
 

@@ -189,6 +189,12 @@ public class BzrVirtualFileListener extends VirtualFileAdapter
     VirtualFile parent = file.getParent();
     String oldName = (String)event.getOldValue();
     String newName = (String)event.getNewValue();
+
+    if( oldName.equals(newName) ) {
+      // file name is NOT changed, it is something like language injection in the PhpStorm IDE 
+      return;
+    }
+
     VirtualFile repo = VcsUtil.getVcsRootFor(project, file);
     if (repo == null || parent == null) {
       return;
