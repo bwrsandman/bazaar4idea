@@ -41,6 +41,7 @@ import org.emergent.bzr4j.intellij.command.ShellCommandService;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.AttributesImpl;
 
 import java.io.File;
 import java.util.Collection;
@@ -241,7 +242,7 @@ public class BzrChangeProvider implements ChangeProvider {
         
     @Override
     public void handleGenericChange(String changeType, String kind, String path, Attributes attributes) {
-      m_changes.add(new GenericChange(changeType, kind, path, attributes));
+      m_changes.add(new GenericChange(changeType, kind, path, new AttributesImpl(attributes)));
     }
 
     @Override
@@ -344,6 +345,22 @@ public class BzrChangeProvider implements ChangeProvider {
         m_path = path;
         m_attributes = attributes;
       }
-    }    
+
+      @Override
+      public String toString() {
+        StringBuffer strbuf = new StringBuffer();
+        strbuf.append("GenericChange:");
+        strbuf.append( "\n  changeType: " + m_changeType);
+        strbuf.append( "\n  kind: " + m_kind);
+        strbuf.append( "\n  path: " + m_path);
+        Attributes attributes = m_attributes;
+        for (int ii = 0; ii < attributes.getLength(); ii++) {
+          String attrName = attributes.getQName(ii);
+          String attrVal = attributes.getValue(ii);
+          strbuf.append( String.format("\n    attrib(%d): \"%s\" = \"%s\"", ii, attrName, attrVal ) );
+        }
+        return strbuf.toString();
+      }
+    }
   }
 }
