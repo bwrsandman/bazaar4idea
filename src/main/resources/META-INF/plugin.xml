@@ -97,6 +97,7 @@
   <![CDATA[
   <h3>Changes since 2.4.1</h3>
   <ul>
+    <li>[bugfix] <a href="https://launchpad.net/bugs/587035">587035</a>
     <li>[bugfix] <a href="https://launchpad.net/bugs/531260">531260</a>
     <li>[bugfix] <a href="https://launchpad.net/bugs/534959">534959</a>
   </ul>
