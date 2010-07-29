@@ -28,9 +28,12 @@ import com.intellij.openapi.vcs.changes.CurrentContentRevision;
 import com.intellij.openapi.vcs.changes.VcsDirtyScope;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
+import org.emergent.bzr4j.core.BazaarChangeType;
+import org.emergent.bzr4j.core.BazaarItemKind;
 import org.emergent.bzr4j.core.BazaarRoot;
 import org.emergent.bzr4j.core.cli.BzrExecException;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
+import org.emergent.bzr4j.core.xmloutput.GenericChange;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import org.emergent.bzr4j.intellij.BzrContentRevision;
 import org.emergent.bzr4j.intellij.BzrRevisionNumber;
@@ -41,7 +44,6 @@ import org.emergent.bzr4j.intellij.command.ShellCommandService;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.AttributesImpl;
 
 import java.io.File;
 import java.util.Collection;
@@ -204,7 +206,7 @@ public class BzrChangeProvider implements ChangeProvider {
 
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
-      LOG.warn(e, "sax error");
+      LOG.warn("sax error", e);
     }
 
     private void processIgnore(String path) {
@@ -241,41 +243,49 @@ public class BzrChangeProvider implements ChangeProvider {
     }
         
     @Override
-    public void handleGenericChange(String changeType, String kind, String path, Attributes attributes) {
-      m_changes.add(new GenericChange(changeType, kind, path, new AttributesImpl(attributes)));
+    public void handleGenericChange(GenericChange change) {
+      m_changes.add(change);
     }
 
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
-      LOG.warn(e, "sax error");
+      LOG.warn("sax error", e);
     }
 
-    private void processGenericChange(String changeType, String kind, String path, Attributes attributes) {
-      if ("added".equals(changeType)) {
-        processAdded(kind, path);
-      } else if ("modified".equals(changeType)) {
-        processModified(kind, path);
-      } else if ("removed".equals(changeType)) {
-        processRemoved(kind, path);
-      } else if ("renamed".equals(changeType)) {
-        processRenamed(kind, path, attributes.getValue("oldpath"));
-      } else if ("unknown".equals(changeType)) {
-        processUnknown(kind, path);
-      } else if ("conflicts".equals(changeType)) {
-        processConflicts(path, attributes.getValue("type"));
-      } else if ("kind_changed".equals(changeType)) {
-        processKindChanged(kind, path, attributes.getValue("oldkind"));
+    private void processGenericChange(BazaarChangeType changeType, BazaarItemKind kind, String path, Attributes attributes) {
+      switch (changeType) {
+        case added:
+          processAdded(kind, path);
+          break;
+        case modified:
+          processModified(kind, path);
+          break;
+        case removed:
+          processRemoved(kind, path);
+          break;
+        case renamed:
+          processRenamed(kind, path, attributes.getValue("oldpath"));
+          break;
+        case unknown:
+          processUnknown(kind, path);
+          break;
+        case conflicts:
+          processConflicts(path, attributes.getValue("type"));
+          break;
+        case kind_changed:
+          processKindChanged(kind, path, attributes.getValue("oldkind"));
+          break;
       }
     }
     
-    private void processAdded(String kind, String path) {
+    private void processAdded(BazaarItemKind kind, String path) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
       Change change = new Change(null, CurrentContentRevision.create(fpath), FileStatus.ADDED);
       CHANGES.debug(String.format("%10s \"%s\"", "added", fpath));
       m_builder.processChange(change, m_vcsKey);
     }
 
-    private void processModified(String kind, String path) {
+    private void processModified(BazaarItemKind kind, String path) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
       BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
       Change change = new Change(bcr, CurrentContentRevision.create(fpath), FileStatus.MODIFIED);
@@ -283,7 +293,7 @@ public class BzrChangeProvider implements ChangeProvider {
       m_builder.processChange(change, m_vcsKey);
     }
 
-    private void processRemoved(String kind, String path) {
+    private void processRemoved(BazaarItemKind kind, String path) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
       BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
       Change change = new Change(bcr, null, FileStatus.DELETED);
@@ -291,7 +301,7 @@ public class BzrChangeProvider implements ChangeProvider {
       m_builder.processChange(change, m_vcsKey);
     }
 
-    private void processRenamed(String kind, String path, String oldPath) {
+    private void processRenamed(BazaarItemKind kind, String path, String oldPath) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
       FilePath oldfpath = VcsUtil.getFilePath(new File(getWorkDir(),oldPath));
       BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, oldfpath, m_bzrRev);
@@ -300,7 +310,7 @@ public class BzrChangeProvider implements ChangeProvider {
       m_builder.processChange(change, m_vcsKey);
     }
 
-    private void processUnknown(String kind, String path) {
+    private void processUnknown(BazaarItemKind kind, String path) {
       File ioFile = new File(getWorkDir(), path);
       VirtualFile vFile = VcsUtil.getVirtualFileWithRefresh(ioFile);
       if (vFile == null) {
@@ -327,40 +337,9 @@ public class BzrChangeProvider implements ChangeProvider {
       m_builder.processChange(change, m_vcsKey);
     }
 
-    private void processKindChanged(String kind, String path, String oldKind) {
+    private void processKindChanged(BazaarItemKind kind, String path, String oldKind) {
       CHANGES.debug(String.format("%10s \"%s\"", "kind_change", path));
-      super.handleKindChanged(kind, path, oldKind);
-    }
-
-    private class GenericChange {
-      
-      public final String m_changeType;
-      public final String m_kind;
-      public final String m_path;
-      public final Attributes m_attributes;
-
-      public GenericChange(String changeType, String kind, String path, Attributes attributes) {
-        m_changeType = changeType;
-        m_kind = kind;
-        m_path = path;
-        m_attributes = attributes;
-      }
-
-      @Override
-      public String toString() {
-        StringBuffer strbuf = new StringBuffer();
-        strbuf.append("GenericChange:");
-        strbuf.append( "\n  changeType: " + m_changeType);
-        strbuf.append( "\n  kind: " + m_kind);
-        strbuf.append( "\n  path: " + m_path);
-        Attributes attributes = m_attributes;
-        for (int ii = 0; ii < attributes.getLength(); ii++) {
-          String attrName = attributes.getQName(ii);
-          String attrVal = attributes.getValue(ii);
-          strbuf.append( String.format("\n    attrib(%d): \"%s\" = \"%s\"", ii, attrName, attrVal ) );
-        }
-        return strbuf.toString();
-      }
+//      super.handleKindChanged(kind, path, oldKind);
     }
   }
 }

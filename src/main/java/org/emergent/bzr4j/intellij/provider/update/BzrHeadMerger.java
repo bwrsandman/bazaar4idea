@@ -22,6 +22,7 @@ import com.intellij.openapi.vcs.update.UpdatedFiles;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.emergent.bzr4j.core.cli.BzrExecException;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
+import org.emergent.bzr4j.core.xmloutput.GenericChange;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import org.emergent.bzr4j.intellij.BzrVcs;
 import org.emergent.bzr4j.intellij.BzrVcsMessages;
@@ -61,33 +62,45 @@ final class BzrHeadMerger {
       collectChanges(new XmlOutputHandler() {
 
         @Override
-        public void handleGenericChange(String changeType, String kind, String path, Attributes attributes) {
+        public void handleGenericChange(GenericChange change) {
+//          String path = change.m_path;
+//          Attributes attributes = change.m_attributes;
           String fileGroupId = null;
           File workDir = getWorkDir();
-          if ("added".equals(changeType)) {
-            fileGroupId = FileGroup.LOCALLY_ADDED_ID;
-            handleAdded(kind, path);
-          } else if ("modified".equals(changeType)) {
-            fileGroupId = FileGroup.MODIFIED_ID;
-            handleModified(kind, path);
-          } else if ("removed".equals(changeType)) {
-            fileGroupId = FileGroup.LOCALLY_REMOVED_ID;
-            handleRemoved(kind, path);
-          } else if ("renamed".equals(changeType)) {
-            fileGroupId = FileGroup.MODIFIED_ID;
-            handleRenamed(kind, path, attributes.getValue("oldpath"));
-          } else if ("unknown".equals(changeType)) {
-            handleUnknown(kind, path);
-          } else if ("conflicts".equals(changeType)) {
-            fileGroupId = FileGroup.MERGED_WITH_CONFLICT_ID;
-            handleConflicts(path, attributes.getValue("type"));
-          } else if ("kind_changed".equals(changeType)) {
-            fileGroupId = FileGroup.MODIFIED_ID;
-            handleKindChanged(kind, path, attributes.getValue("oldkind"));
+
+          switch (change.m_changeType) {
+            case added:
+              fileGroupId = FileGroup.LOCALLY_ADDED_ID;
+//              handleAdded(change.m_kind, change.m_path);
+              break;
+            case modified:
+              fileGroupId = FileGroup.MODIFIED_ID;
+//              handleModified(change.m_kind, change.m_path);
+              break;
+            case removed:
+              fileGroupId = FileGroup.LOCALLY_REMOVED_ID;
+//              handleRemoved(change.m_kind, change.m_path);
+              break;
+            case renamed:
+              fileGroupId = FileGroup.MODIFIED_ID;
+//              handleRenamed(change.m_kind, change.m_path, change.m_attributes.getValue("oldpath"));
+              break;
+            case unknown:
+//              handleUnknown(change.m_kind, change.m_path);
+              break;
+            case conflicts:
+              fileGroupId = FileGroup.MERGED_WITH_CONFLICT_ID;
+//              handleConflicts(change.m_path, change.m_attributes.getValue("type"));
+              break;
+            case kind_changed:
+              fileGroupId = FileGroup.MODIFIED_ID;
+//              handleKindChanged(change.m_kind, change.m_path, change.m_attributes.getValue("oldkind"));
+              break;
           }
+
           if (fileGroupId != null) {
-            String filePath = (new File(workDir, path)).getAbsolutePath();
-            LOG.debug("adding updatedFile: " + fileGroupId + " " + filePath);
+            String filePath = (new File(workDir, change.m_path)).getAbsolutePath();
+//            LOG.debug("adding updatedFile: " + fileGroupId + " " + filePath);
             updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.VCS_NAME, vcsRevNo);
           }
         }
