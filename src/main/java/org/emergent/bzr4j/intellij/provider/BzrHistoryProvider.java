@@ -107,6 +107,10 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
       public HistoryAsTreeProvider getHistoryAsTreeProvider() {
         return null;
       }
+
+      public VcsHistorySession copy() {
+        return this;
+      }
     };
   }
 
