@@ -23,12 +23,15 @@ import com.intellij.openapi.vcs.checkin.CheckinEnvironment;
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.NullableFunction;
+import com.intellij.util.PairConsumer;
 import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.intellij.BzrFile;
 import org.emergent.bzr4j.intellij.BzrVcsMessages;
 import org.emergent.bzr4j.intellij.command.BzrAddCommand;
 import org.emergent.bzr4j.intellij.command.BzrCommandException;
 import org.emergent.bzr4j.intellij.command.BzrCommitCommand;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -44,6 +47,12 @@ public class BzrCheckinEnvironment implements CheckinEnvironment {
   }
 
   public RefreshableOnComponent createAdditionalOptionsPanel(CheckinProjectPanel panel) {
+    return createAdditionalOptionsPanel(panel, null);
+  }
+
+  public RefreshableOnComponent createAdditionalOptionsPanel(
+      CheckinProjectPanel checkinProjectPanel,
+      PairConsumer<Object, Object> objectObjectPairConsumer) {
     return null;
   }
 
@@ -60,8 +69,13 @@ public class BzrCheckinEnvironment implements CheckinEnvironment {
     return BzrVcsMessages.message("bzr4intellij.commit", params);
   }
 
-  @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
   public List<VcsException> commit(List<Change> changes, String preparedComment) {
+    //noinspection unchecked
+    return commit(changes, preparedComment, NullableFunction.NULL);
+  }
+
+  @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
+  public List<VcsException> commit(List<Change> changes, String preparedComment, @NotNull NullableFunction<Object, Object> parametersHolder) {
     List<VcsException> exceptions = new LinkedList<VcsException>();
     for (Map.Entry<VirtualFile, List<BzrFile>> entry : getFilesByRepository(changes).entrySet()) {
       BzrCommitCommand command = new BzrCommitCommand(project, entry.getKey(), preparedComment);
