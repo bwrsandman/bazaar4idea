@@ -130,6 +130,14 @@ public class BzrAnnotation implements FileAnnotation {
     public String getTooltipText(int lineNumber) {
       return null;
     }
+
+    public String getId() {
+      return null;
+    }
+
+    public boolean isShowByDefault() {
+      return false;
+    }
   }
 
 }

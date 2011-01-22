@@ -42,6 +42,7 @@ import com.intellij.openapi.vcs.history.VcsHistoryProvider;
 import com.intellij.openapi.vcs.merge.MergeProvider;
 import com.intellij.openapi.vcs.rollback.RollbackEnvironment;
 import com.intellij.openapi.vcs.update.UpdateEnvironment;
+import com.intellij.openapi.vcs.versionBrowser.CommittedChangeList;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -81,7 +82,7 @@ import java.util.concurrent.ScheduledFuture;
 /**
  * @author Patrick Woodworth
  */
-public class BzrVcs extends AbstractVcs implements Disposable {
+public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposable {
 
   static final Logger LOG = Logger.getInstance(BzrVcs.class.getName());
 
