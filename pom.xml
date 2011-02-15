@@ -6,10 +6,10 @@
 
   <groupId>org.emergent.bzr4j</groupId>
   <artifactId>bzr4intellij</artifactId>
-  <version>2.6.0</version>
+  <version>2.6.1</version>
   <packaging>jar</packaging>
   <name>Bzr4IntelliJ Plugin</name>
-  <url>http://launchpad.net/bzr4j</url>
+  <url>http://bzr4j.emergent.org/</url>
 
   <properties>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>

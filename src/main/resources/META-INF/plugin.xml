@@ -19,7 +19,7 @@
   ]]>
   </description>
   <category>VCS Integration</category>
-  <vendor url="http://emergent.org/" logo="/org/emergent/bzr4j/intellij/bzr.png" email="patrick@woodworth.org">Patrick Woodworth</vendor>
+  <vendor url="http://bzr4j.emergent.org/" logo="/org/emergent/bzr4j/intellij/bzr.png" email="patrick@woodworth.org">Patrick Woodworth</vendor>
   <idea-version since-build="103.72"/>
 
   <depends>com.intellij.modules.vcs</depends>
@@ -95,6 +95,10 @@
 
   <change-notes>
   <![CDATA[
+  <h3>Changes since 2.6.0</h3>
+  <ul>
+    <li>[bugfix] <a href="https://launchpad.net/bugs/716279">716279</a>
+  </ul>
   <h3>Changes since 2.4.3</h3>
   <ul>
     <li>[bugfix] <a href="https://launchpad.net/bugs/620420">620420</a>

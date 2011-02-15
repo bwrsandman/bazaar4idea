@@ -40,7 +40,8 @@ public class BzrProjectConfigurable implements Configurable {
   }
 
   public String getHelpTopic() {
-    return null;
+    // This is supposed to be nullable, but there's a bug in VcsManagerConfigurable which requires this be not null
+    return "project.propVCSSupport.VCSs.Bazaar";
   }
 
   public JComponent createComponent() {
