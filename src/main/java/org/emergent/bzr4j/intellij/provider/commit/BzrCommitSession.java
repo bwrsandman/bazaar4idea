@@ -97,4 +97,7 @@ public class BzrCommitSession implements CommitSession {
     return result;
   }
 
+  public String getHelpId() {
+    return null;
+  }
 }
