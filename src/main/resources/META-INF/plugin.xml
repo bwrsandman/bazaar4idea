@@ -95,6 +95,10 @@
 
   <change-notes>
   <![CDATA[
+  <h3>Changes since 2.6.1</h3>
+  <ul>
+    <li>[feature] Supports IntelliJ IDEA 11.0</li>
+  </ul>
   <h3>Changes since 2.6.0</h3>
   <ul>
     <li>[bugfix] <a href="https://launchpad.net/bugs/716279">716279</a>
