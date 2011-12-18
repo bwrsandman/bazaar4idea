@@ -14,7 +14,7 @@ package org.emergent.bzr4j.intellij.command;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.vcsUtil.VcsUtil;
+import com.intellij.vcsUtil.VcsImplUtil;
 import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.core.cli.BzrStandardResult;
 import org.emergent.bzr4j.intellij.BzrVcs;
@@ -67,7 +67,7 @@ public class BzrPushCommand {
           }
         }
       } catch (URISyntaxException e) {
-        VcsUtil.showErrorMessage(project, "Invalid destination: " + destination, "Error");
+        VcsImplUtil.showErrorMessage(project, "Invalid destination: " + destination, "Error");
       }
     }
 

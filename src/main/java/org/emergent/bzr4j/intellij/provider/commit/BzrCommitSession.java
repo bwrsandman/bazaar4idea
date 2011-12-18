@@ -19,6 +19,7 @@ import com.intellij.openapi.vcs.changes.CommitSession;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vcs.changes.VcsDirtyScopeManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.vcsUtil.VcsImplUtil;
 import com.intellij.vcsUtil.VcsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.intellij.BzrVcsMessages;
@@ -64,7 +65,7 @@ public class BzrCommitSession implements CommitSession {
         vcsDirtyScopeManager.dirDirtyRecursively(root);
         root.refresh(true, true);
       } catch (BzrCommandException e) {
-        VcsUtil.showErrorMessage(project, e.getMessage(), "Error");
+        VcsImplUtil.showErrorMessage(project, e.getMessage(), "Error");
       }
     }
   }

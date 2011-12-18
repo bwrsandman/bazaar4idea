@@ -15,9 +15,8 @@ package org.emergent.bzr4j.intellij.command;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.vcsUtil.VcsUtil;
+import com.intellij.vcsUtil.VcsImplUtil;
 import org.emergent.bzr4j.core.cli.BzrAbstractResult;
-import org.emergent.bzr4j.core.cli.BzrExecException;
 import org.emergent.bzr4j.core.cli.BzrExecService;
 import org.emergent.bzr4j.core.cli.BzrStandardResult;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
@@ -26,7 +25,6 @@ import org.emergent.bzr4j.intellij.BzrGlobalSettings;
 import org.emergent.bzr4j.intellij.BzrVcsMessages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.util.List;
@@ -141,7 +139,7 @@ public final class ShellCommandService extends BzrExecService<BzrIdeaExec> {
         .append(e.getMessage());
 
     Object[] params = new Object[] { };
-    VcsUtil.showErrorMessage(
+    VcsImplUtil.showErrorMessage(
         project,
         message.toString(),
         BzrVcsMessages.message("bzr4intellij.error", params)

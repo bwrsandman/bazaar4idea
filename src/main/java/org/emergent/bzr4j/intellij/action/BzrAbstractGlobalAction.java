@@ -23,10 +23,10 @@ import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsRoot;
 import com.intellij.openapi.vcs.changes.VcsDirtyScopeManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.vcsUtil.VcsUtil;
-import org.emergent.bzr4j.intellij.util.BzrDebug;
+import com.intellij.vcsUtil.VcsImplUtil;
 import org.emergent.bzr4j.intellij.BzrVcs;
 import org.emergent.bzr4j.intellij.command.BzrCommandException;
+import org.emergent.bzr4j.intellij.util.BzrDebug;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ abstract class BzrAbstractGlobalAction extends AnAction {
     try {
       command.execute();
     } catch (BzrCommandException e) {
-      VcsUtil.showErrorMessage(project, e.getMessage(), "Error");
+      VcsImplUtil.showErrorMessage(project, e.getMessage(), "Error");
     }
     VcsDirtyScopeManager vcsDirtyScopeManager = VcsDirtyScopeManager.getInstance(project);
     vcsDirtyScopeManager.dirDirtyRecursively(command.getRepo());

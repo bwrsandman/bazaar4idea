@@ -13,6 +13,7 @@
 package org.emergent.bzr4j.intellij.action;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.vcsUtil.VcsImplUtil;
 import com.intellij.vcsUtil.VcsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.core.cli.BzrStandardResult;
@@ -34,7 +35,7 @@ final class BzrCommandResultNotifier {
       VcsUtil.showStatusMessage(project, out.get(out.size() - 1));
     }
     if (!err.isEmpty()) {
-      VcsUtil.showErrorMessage(
+      VcsImplUtil.showErrorMessage(
           project, "<html>" + StringUtils.join(err, "<br>") + "</html>", "Error"
       );
     }
