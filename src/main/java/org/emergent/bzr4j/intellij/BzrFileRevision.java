@@ -1,9 +1,10 @@
 package org.emergent.bzr4j.intellij;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Throwable2Computable;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
+import com.intellij.openapi.vcs.impl.ContentRevisionCache;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.emergent.bzr4j.core.utils.StringUtil;
@@ -24,7 +25,6 @@ public class BzrFileRevision implements VcsFileRevision {
   private final Date revisionDate;
   private final String author;
   private final String commitMessage;
-  private byte[] content;
 
   public BzrFileRevision(Project project, BzrFile file, BzrRevisionNumber revisionNumber,
       String branchName, String revisionDate, String author, String commitMessage) throws ParseException {
@@ -62,22 +62,28 @@ public class BzrFileRevision implements VcsFileRevision {
     return commitMessage;
   }
 
-  public void loadContent() throws VcsException {
+  public byte[] loadContent() throws VcsException {
     try {
       Charset charset = m_file.toFilePath().getCharset();
       String result = new BzrCatCommand(m_project).execute(m_file, m_revisionNumber, charset);
       if (result == null) {
-        content = new byte[0];
+        return new byte[0];
       } else {
-        content = result.getBytes(charset.name());
+        return result.getBytes(charset.name());
       }
     } catch (UnsupportedEncodingException e) {
       throw new VcsException(e);
     }
   }
 
-  public byte[] getContent() throws IOException {
-    return content;
+  public byte[] getContent() throws IOException, VcsException {
+    return ContentRevisionCache.getOrLoadAsBytes(m_project, m_file.toFilePath(), getRevisionNumber(), BzrVcs.getKey(),
+        ContentRevisionCache.UniqueType.REPOSITORY_CONTENT,
+        new Throwable2Computable<byte[], VcsException, IOException>() {
+          public byte[] compute() throws VcsException, IOException {
+            return loadContent();
+          }
+        });
   }
 
   @Override

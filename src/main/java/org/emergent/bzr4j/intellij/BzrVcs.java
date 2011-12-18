@@ -33,6 +33,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vcs.AbstractVcs;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
+import com.intellij.openapi.vcs.VcsKey;
 import com.intellij.openapi.vcs.annotate.AnnotationProvider;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.ChangeProvider;
@@ -89,6 +90,8 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   public static final String VCS_NAME = "Bazaar";
 
   public static final String VCS_METADATA_DIR = ".bzr";
+
+  private final static VcsKey ourKey = createKey(VCS_NAME);
 
   public static final Topic<BzrUpdater> BRANCH_TOPIC = new Topic<BzrUpdater>("bzr4intellij.branch", BzrUpdater.class);
   public static final Topic<BzrUpdater> INCOMING_TOPIC =
@@ -487,5 +490,9 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 
   public BzrRootTracker getMyRootTracker() {
     return myRootTracker;
+  }
+
+  public static VcsKey getKey() {
+    return ourKey;
   }
 }
