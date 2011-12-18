@@ -147,8 +147,8 @@ public class BzrSendErrorForm extends DialogWrapper {
     myMainPanel = new JPanel();
     myMainPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
     final JLabel label1 = new JLabel();
-    this.$$$loadLabelText$$$(label1, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.prompt"));
+    this.$$$loadLabelText$$$(label1, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.prompt"));
     myMainPanel.add(label1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JScrollPane scrollPane1 = new JScrollPane();
@@ -170,21 +170,21 @@ public class BzrSendErrorForm extends DialogWrapper {
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "diagnostic.error.report.login.group")));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("diagnostic.error.report.login.group")));
     final JPanel panel2 = new JPanel();
     panel2.setLayout(new GridLayoutManager(4, 2, new Insets(0, 0, 0, 0), -1, -1));
     panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     final JLabel label2 = new JLabel();
-    this.$$$loadLabelText$$$(label2, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.login.password"));
+    this.$$$loadLabelText$$$(label2, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.login.password"));
     panel2.add(label2, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JLabel label3 = new JLabel();
-    this.$$$loadLabelText$$$(label3, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.login.name"));
+    this.$$$loadLabelText$$$(label3, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.login.name"));
     panel2.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     myItnLoginTextField = new JTextField();
@@ -198,13 +198,13 @@ public class BzrSendErrorForm extends DialogWrapper {
             GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null,
             0, false));
     final JLabel label4 = new JLabel();
-    this.$$$loadLabelText$$$(label4, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.smtp.server"));
+    this.$$$loadLabelText$$$(label4, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.smtp.server"));
     panel2.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JLabel label5 = new JLabel();
-    this.$$$loadLabelText$$$(label5, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.email"));
+    this.$$$loadLabelText$$$(label5, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.email"));
     panel2.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     myItnServerTextField = new JTextField();
@@ -220,15 +220,15 @@ public class BzrSendErrorForm extends DialogWrapper {
             0, false));
     myRememberITNPasswordCheckBox = new JCheckBox();
     this.$$$loadButtonText$$$(myRememberITNPasswordCheckBox,
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "diagnostic.error.report.login.remember.password.checkbox"));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("diagnostic.error.report.login.remember.password.checkbox"));
     panel1.add(myRememberITNPasswordCheckBox,
         new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JLabel label6 = new JLabel();
-    this.$$$loadLabelText$$$(label6, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-        "diagnostic.error.report.description"));
+    this.$$$loadLabelText$$$(label6, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("diagnostic.error.report.description"));
     myMainPanel.add(label6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

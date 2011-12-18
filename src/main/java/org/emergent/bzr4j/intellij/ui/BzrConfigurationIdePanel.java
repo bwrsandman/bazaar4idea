@@ -200,8 +200,8 @@ public class BzrConfigurationIdePanel implements Disposable {
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "bzr4intellij.path_to_executable.text")));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("bzr4intellij.path_to_executable.text")));
     pathSelector = new TextFieldWithBrowseButton();
     pathSelector.setEnabled(true);
     panel1.add(pathSelector,
@@ -210,9 +210,8 @@ public class BzrConfigurationIdePanel implements Disposable {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(100, -1), null,
             null, 0, false));
     pathDefaultButton = new JButton();
-    this.$$$loadButtonText$$$(pathDefaultButton,
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configdialog.default_path_button.text"));
+    this.$$$loadButtonText$$$(pathDefaultButton, ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+        .getString("configdialog.default_path_button.text"));
     panel1.add(pathDefaultButton,
         new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -232,12 +231,12 @@ public class BzrConfigurationIdePanel implements Disposable {
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     panel2.setBorder(BorderFactory.createTitledBorder(
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.miscellaneous_group.text")));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.miscellaneous_group.text")));
     m_trimAnnotationCheckBox = new JCheckBox();
     this.$$$loadButtonText$$$(m_trimAnnotationCheckBox,
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.trim_annotation_author.text"));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.trim_annotation_author.text"));
     panel2.add(m_trimAnnotationCheckBox,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -247,8 +246,8 @@ public class BzrConfigurationIdePanel implements Disposable {
         GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     m_modalErrorPopupEnabledCheckBox = new JCheckBox();
     this.$$$loadButtonText$$$(m_modalErrorPopupEnabledCheckBox,
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.allow_modal_error_popup.text"));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.allow_modal_error_popup.text"));
     panel2.add(m_modalErrorPopupEnabledCheckBox,
         new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -259,8 +258,8 @@ public class BzrConfigurationIdePanel implements Disposable {
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     panel3.setBorder(BorderFactory.createTitledBorder(
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.envvars_group.text")));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.envvars_group.text")));
     m_envBzrEmailTextField = new JTextField();
     m_envBzrEmailTextField.setEnabled(true);
     m_envBzrEmailTextField.setText("");
@@ -298,12 +297,12 @@ public class BzrConfigurationIdePanel implements Disposable {
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
     panel4.setBorder(BorderFactory.createTitledBorder(
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.experimental_group.text")));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.experimental_group.text")));
     m_granularExecLockingCheckBox = new JCheckBox();
     this.$$$loadButtonText$$$(m_granularExecLockingCheckBox,
-        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages").getString(
-            "configpanel.fine_grained_exec_locking.text"));
+        ResourceBundle.getBundle("org/emergent/bzr4j/intellij/BzrVcsMessages")
+            .getString("configpanel.fine_grained_exec_locking.text"));
     panel4.add(m_granularExecLockingCheckBox,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
