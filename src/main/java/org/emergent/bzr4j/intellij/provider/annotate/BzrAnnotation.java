@@ -23,8 +23,8 @@ import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
 import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.intellij.BzrFile;
-import org.emergent.bzr4j.intellij.BzrFileRevision;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -103,10 +103,21 @@ public class BzrAnnotation implements FileAnnotation {
     return annotationLine.getVcsRevisionNumber();
   }
 
+  public Date getLineDate(int lineNumber) {
+    if (lineNumber >= lines.size() || lineNumber < 0) {
+      return null;
+    }
+    return lines.get(lineNumber).getDate();
+  }
+
   public List<VcsFileRevision> getRevisions() {
     List<VcsFileRevision> result = new LinkedList<VcsFileRevision>();
     result.addAll(vcsFileRevisions);
     return result;
+  }
+
+  public int getLineCount() {
+    return lines.size();
   }
 
   class HgLineAnnotationAspect implements LineAnnotationAspect {
@@ -139,5 +150,4 @@ public class BzrAnnotation implements FileAnnotation {
       return false;
     }
   }
-
 }

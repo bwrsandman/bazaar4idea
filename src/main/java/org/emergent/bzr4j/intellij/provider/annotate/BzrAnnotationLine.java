@@ -14,12 +14,22 @@ package org.emergent.bzr4j.intellij.provider.annotate;
 
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.EnumMap;
 
 public class BzrAnnotationLine {
 
   private EnumMap<BzrAnnotation.FIELD, Object> fields =
       new EnumMap<BzrAnnotation.FIELD, Object>(BzrAnnotation.FIELD.class);
+
+  private ThreadLocal<SimpleDateFormat> dateFormat = new ThreadLocal<SimpleDateFormat>() {
+    @Override
+    public SimpleDateFormat get() {
+      return new SimpleDateFormat("yyyyMMdd");
+    }
+  };
 
   public BzrAnnotationLine(String user, VcsRevisionNumber revision, String date, Integer line, String content) {
     fields.put(BzrAnnotation.FIELD.USER, user);
@@ -38,4 +48,17 @@ public class BzrAnnotationLine {
     return fields.get(field);
   }
 
+  public Date getDate() {
+    String sDate = (String)get(BzrAnnotation.FIELD.DATE);
+    if (sDate != null) {
+      try {
+        return dateFormat.get().parse(sDate);
+      } catch (ParseException e) {
+        return null;
+      }
+    }
+    else {
+      return null;
+    }
+  }
 }
