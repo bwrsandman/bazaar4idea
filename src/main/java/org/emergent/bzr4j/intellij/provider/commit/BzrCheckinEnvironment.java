@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BzrCheckinEnvironment implements CheckinEnvironment {
 
@@ -75,7 +76,11 @@ public class BzrCheckinEnvironment implements CheckinEnvironment {
   }
 
   @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
-  public List<VcsException> commit(List<Change> changes, String preparedComment, @NotNull NullableFunction<Object, Object> parametersHolder) {
+  public List<VcsException> commit(
+      List<Change> changes,
+      String preparedComment,
+      @NotNull NullableFunction<Object, Object> parametersHolder,
+      Set<String> feedback) {
     List<VcsException> exceptions = new LinkedList<VcsException>();
     for (Map.Entry<VirtualFile, List<BzrFile>> entry : getFilesByRepository(changes).entrySet()) {
       BzrCommitCommand command = new BzrCommitCommand(project, entry.getKey(), preparedComment);
