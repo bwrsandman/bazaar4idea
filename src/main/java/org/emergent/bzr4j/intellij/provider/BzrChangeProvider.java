@@ -46,12 +46,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BzrChangeProvider implements ChangeProvider {
 
@@ -93,7 +88,20 @@ public class BzrChangeProvider implements ChangeProvider {
       }
 
       for (Map.Entry<VirtualFile,FilePath> rootEntry : rootsMap.entrySet()) {
-        process(builder, rootEntry.getKey(), rootEntry.getValue(), rootRevnos);
+        VirtualFile virtualRoot = rootEntry.getKey();
+        FilePath rootPath = rootEntry.getValue();
+
+        HashMap<VirtualFile, FilePath> subRoots = new HashMap<VirtualFile, FilePath>();
+        for (Map.Entry<VirtualFile, FilePath> subEntry : rootsMap.entrySet()) {
+          VirtualFile virtualSubRoot = subEntry.getKey();
+          FilePath subPath = subEntry.getValue();
+          if (!subPath.isUnder(rootPath, true)) {
+            continue;
+          }
+          subRoots.put(virtualSubRoot, subPath);
+        }
+
+        process(builder, virtualRoot, rootPath, rootRevnos, subRoots);
       }
     } catch (BzrExecException e) {
       LOG.debug(e);
@@ -133,7 +141,7 @@ public class BzrChangeProvider implements ChangeProvider {
       ChangelistBuilder builder,
       VirtualFile vcsVirtualRoot,
       FilePath filePath,
-      Map<File, BzrRevisionNumber> processedRoots) throws BzrExecException {
+      Map<File, BzrRevisionNumber> processedRoots, HashMap<VirtualFile, FilePath> subRoots) throws BzrExecException {
 
     if (filePath.isNonLocal()) {
       CHANGES.debug("no processing (nonlocal path): " + String.valueOf(filePath));
@@ -150,6 +158,18 @@ public class BzrChangeProvider implements ChangeProvider {
 
     final File ioRoot = bzrRoot.getFile();
 
+    Set<File> ioSubRoots = new HashSet<File>();
+    for (FilePath path : subRoots.values()) {
+      BazaarRoot bzrSubRoot = BazaarRoot.findBranchLocation(path.getIOFile());
+      if (bzrSubRoot == null) {
+        continue;
+      }
+      File ioSubRoot = bzrSubRoot.getFile();
+      if (!ioRoot.equals(ioSubRoot)) {
+        ioSubRoots.add(ioSubRoot);
+      }
+    }
+
     final String relpath = target.equals(ioRoot) ? null : BzrUtil.relativePath(ioRoot,target);
 
     CHANGES.debug("is processing: " + String.valueOf(filePath));
@@ -162,7 +182,7 @@ public class BzrChangeProvider implements ChangeProvider {
 
     final ShellCommandService service = ShellCommandService.getInstance(m_project);
 
-    MyIgnoredHandler ignoredHandler = new MyIgnoredHandler(builder, ioRoot);
+    MyIgnoredHandler ignoredHandler = new MyIgnoredHandler(builder, ioRoot, ioSubRoots);
 
     BzrIdeaExec ignoredExec = new BzrIdeaExec(bzrRoot, "xmlls");
     ignoredExec.addArguments("--ignored");
@@ -171,7 +191,7 @@ public class BzrChangeProvider implements ChangeProvider {
     service.executeUnsafe(ignoredExec, BzrXmlResult.createBzrXmlResult(ignoredHandler));
     ignoredHandler.processResults();
 
-    MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, ioRoot, revno);
+    MyStatusHandler statusHandler = new MyStatusHandler(vcsVirtualRoot, builder, ioRoot, revno, ioSubRoots);
 
     BzrIdeaExec statusExec = new BzrIdeaExec(bzrRoot, "xmlstatus");
     statusExec.setStderrValidationEnabled(false);
@@ -186,11 +206,13 @@ public class BzrChangeProvider implements ChangeProvider {
 
     private ChangelistBuilder m_builder;
     private File m_bzrRoot;
+    private Set<File> m_bzrSubRoots;
     private final Collection<String> m_ignoredList = new LinkedList<String>();
 
-    public MyIgnoredHandler(ChangelistBuilder builder, File bzrRoot) {
+    public MyIgnoredHandler(ChangelistBuilder builder, File bzrRoot, Set<File> ioSubRoots) {
       m_builder = builder;
       m_bzrRoot = bzrRoot;
+      m_bzrSubRoots = ioSubRoots;
     }
 
     public void processResults() {
@@ -211,6 +233,9 @@ public class BzrChangeProvider implements ChangeProvider {
 
     private void processIgnore(String path) {
       File ignored = new File(m_bzrRoot, path);
+      if (m_bzrSubRoots.contains(ignored)) {
+        return;
+      }
       IGNORED.debug(String.format("%10s \"%s\"", "ignored", ignored));
       m_builder.processIgnoredFile(VcsUtil.getVirtualFile(ignored));
     }
@@ -223,12 +248,14 @@ public class BzrChangeProvider implements ChangeProvider {
     private VirtualFile m_vcsRoot;
     private File m_bzrRoot;
     private final Collection<GenericChange> m_changes = new LinkedList<GenericChange>();
+    private Set<File> m_bzrSubRoots;
 
-    public MyStatusHandler(VirtualFile vcsRoot, ChangelistBuilder builder, File bzrRoot, BzrRevisionNumber bzrRev) {
+    public MyStatusHandler(VirtualFile vcsRoot, ChangelistBuilder builder, File bzrRoot, BzrRevisionNumber bzrRev, Set<File> ioSubRoots) {
       m_vcsRoot = vcsRoot;
       m_builder = builder;
       m_bzrRoot = bzrRoot;
       m_bzrRev = bzrRev;
+      m_bzrSubRoots = ioSubRoots;
     }
 
     public void processResults() {
@@ -324,6 +351,10 @@ public class BzrChangeProvider implements ChangeProvider {
       UNKNOWN.debug(String.format("%10s \"%s\"", "unknown", vFile));
       builder.processUnversionedFile(vFile);
       if (vFile.isDirectory()) {
+        File ioFile = VcsUtil.getFilePath(vFile.getPath(), true).getIOFile();
+        if (this.m_bzrSubRoots.contains(ioFile)) {
+          return;
+        }
         for (VirtualFile child : vFile.getChildren()) {
           processRecursive(builder, child);
         }
