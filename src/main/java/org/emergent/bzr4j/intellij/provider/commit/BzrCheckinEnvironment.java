@@ -126,6 +126,10 @@ public class BzrCheckinEnvironment implements CheckinEnvironment {
     return false;
   }
 
+  public boolean isRefreshAfterCommitNeeded() {
+    return false;
+  }
+
   private Map<VirtualFile, List<BzrFile>> getFilesByRepository(List<Change> changes) {
     Map<VirtualFile, List<BzrFile>> result = new HashMap<VirtualFile, List<BzrFile>>();
     for (Change change : changes) {
