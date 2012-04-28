@@ -51,7 +51,10 @@ public class BzrAnnotateCommand extends BzrAbstractCommand {
         if (atIdx > 0 && BzrGlobalSettings.getInstance().isAnnotationTrimmingEnabled()) {
           user = user.substring(0, atIdx);
         }
-        BzrAnnotationLine annotationLine = new BzrAnnotationLine(user, revision, date, annotations.size(), content);
+        // convert the strftime'%Y%m%d' - '%Y-%m-%d' to match the command line tool
+        String expandedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+        BzrAnnotationLine annotationLine = new BzrAnnotationLine(user, revision, expandedDate,
+          annotations.size(), content);
         annotations.add(annotationLine);
       }
     };

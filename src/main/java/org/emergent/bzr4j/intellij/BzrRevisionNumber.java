@@ -24,9 +24,9 @@ public final class BzrRevisionNumber implements VcsRevisionNumber {
 
   private BzrRevisionNumber(@NotNull String rev) {
     m_rev = rev;
-    if (rev.length() > 0 && rev.indexOf(':') < 0) {
-      m_rev = "revno:" + m_rev;
-    }
+//    if (rev.length() > 0 && rev.indexOf(':') < 0) {
+//      m_rev = "revno:" + m_rev;
+//    }
   }
 
   public String asString() {
@@ -42,13 +42,6 @@ public final class BzrRevisionNumber implements VcsRevisionNumber {
       return -1;
     }
 
-//        BzrRevisionNumber hgRevisionNumber = (BzrRevisionNumber)o;
-//        if (changeset.equals(hgRevisionNumber.changeset)) {
-//            return 0;
-//        }
-
-//        return revision.compareTo(hgRevisionNumber.revision);
-
     return NaturalOrderComparator.compareObjects(asString(), o.asString());
   }
 
@@ -61,7 +54,6 @@ public final class BzrRevisionNumber implements VcsRevisionNumber {
   public int hashCode() {
     return new HashCodeBuilder()
         .append(m_rev)
-//                .append(changeset)
         .toHashCode();
   }
 

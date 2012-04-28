@@ -14,10 +14,7 @@ package org.emergent.bzr4j.intellij.provider.annotate;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.annotate.AnnotationListener;
-import com.intellij.openapi.vcs.annotate.AnnotationSourceSwitcher;
-import com.intellij.openapi.vcs.annotate.FileAnnotation;
-import com.intellij.openapi.vcs.annotate.LineAnnotationAspect;
+import com.intellij.openapi.vcs.annotate.*;
 import com.intellij.openapi.vcs.changes.CurrentContentRevision;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
@@ -103,6 +100,7 @@ public class BzrAnnotation implements FileAnnotation {
     return annotationLine.getVcsRevisionNumber();
   }
 
+  @Override
   public Date getLineDate(int lineNumber) {
     if (lineNumber >= lines.size() || lineNumber < 0) {
       return null;
@@ -116,15 +114,30 @@ public class BzrAnnotation implements FileAnnotation {
     return result;
   }
 
+  @Override
   public int getLineCount() {
     return lines.size();
   }
 
-  class HgLineAnnotationAspect implements LineAnnotationAspect {
+  private static String id(FIELD field) {
+    switch (field) {
+      case USER: return LineAnnotationAspect.AUTHOR;
+      case REVISION: return LineAnnotationAspect.REVISION;
+      case DATE: return LineAnnotationAspect.DATE;
+      default: return null;
+    }
+  }
+
+  private static boolean isShowByDefault(FIELD aspectType) {
+    return aspectType == FIELD.DATE || aspectType == FIELD.USER;
+  }
+
+  class HgLineAnnotationAspect extends LineAnnotationAspectAdapter {
 
     private final FIELD aspectType;
 
     public HgLineAnnotationAspect(FIELD aspectType) {
+      super(id(aspectType), BzrAnnotation.isShowByDefault(aspectType));
       this.aspectType = aspectType;
     }
 
@@ -138,16 +151,9 @@ public class BzrAnnotation implements FileAnnotation {
           : annotationLine.get(aspectType).toString();
     }
 
-    public String getTooltipText(int lineNumber) {
-      return null;
-    }
-
-    public String getId() {
-      return null;
-    }
-
-    public boolean isShowByDefault() {
-      return false;
+    @Override
+    protected void showAffectedPaths(int lineNum) {
+      // todo
     }
   }
 }
