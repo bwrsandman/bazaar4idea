@@ -83,7 +83,7 @@ abstract class BzrAbstractGlobalAction extends AnAction {
 
     BzrVcs vcs = (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.VCS_NAME);
 
-    if (!vcs.isStarted()) {
+    if (vcs == null || !vcs.isStarted()) {
       presentation.setEnabled(false);
     }
   }
@@ -92,8 +92,9 @@ abstract class BzrAbstractGlobalAction extends AnAction {
     List<VirtualFile> repos = new LinkedList<VirtualFile>();
     VcsRoot[] roots = ProjectLevelVcsManager.getInstance(project).getAllVcsRoots();
     for (VcsRoot root : roots) {
-      if (BzrVcs.VCS_NAME.equals(root.vcs.getName())) {
-        repos.add(root.path);
+      //noinspection ConstantConditions
+      if (BzrVcs.VCS_NAME.equals(root.getVcs().getName())) {
+        repos.add(root.getPath());
       }
     }
     return repos;

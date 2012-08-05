@@ -2,6 +2,7 @@ package org.emergent.bzr4j.intellij;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Throwable2Computable;
+import com.intellij.openapi.vcs.RepositoryLocation;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.impl.ContentRevisionCache;
@@ -107,5 +108,10 @@ public class BzrFileRevision implements VcsFileRevision {
         .append(m_file, that.m_file)
         .append(m_revisionNumber, that.m_revisionNumber)
         .isEquals();
+  }
+
+  @Override
+  public RepositoryLocation getChangedRepositoryPath() {
+    return null;  // use initial url..
   }
 }

@@ -50,7 +50,8 @@ class BzrIncomingStatusUpdater implements BzrUpdater {
             VcsRoot[] roots = ProjectLevelVcsManager.getInstance(project).getAllVcsRoots();
             List<BzrFileRevision> changesets = new LinkedList<BzrFileRevision>();
             for (VcsRoot root : roots) {
-              BzrFile hgFile = new BzrFile(root.path, new File("."));
+              @SuppressWarnings("ConstantConditions")
+              BzrFile hgFile = new BzrFile(root.getPath(), new File("."));
               changesets.addAll(command.execute(hgFile, LIMIT - changesets.size()));
             }
             status.setChanges(changesets.size(), new IncomingChangesetFormatter(changesets));

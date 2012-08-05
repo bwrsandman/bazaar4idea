@@ -50,7 +50,8 @@ class BzrOutgoingStatusUpdater implements BzrUpdater {
             VcsRoot[] roots = ProjectLevelVcsManager.getInstance(project).getAllVcsRoots();
             List<BzrFileRevision> outgoing = new LinkedList<BzrFileRevision>();
             for (VcsRoot root : roots) {
-              BzrFile hgFile = new BzrFile(root.path, new File("."));
+              @SuppressWarnings("ConstantConditions")
+              BzrFile hgFile = new BzrFile(root.getPath(), new File("."));
               outgoing.addAll(command.execute(hgFile, LIMIT - outgoing.size()));
             }
             status.setChanges(outgoing.size(), new OutgoingChangesetFormatter(outgoing));

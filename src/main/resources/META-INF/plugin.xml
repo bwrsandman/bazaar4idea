@@ -9,8 +9,8 @@
   <p>
   System Requirements:
   <ul>
-    <li>IntelliJ IDEA 10+ (Ultimate or Community)
-    <li>Java 5+
+    <li>IntelliJ IDEA 12+ (Ultimate or Community)
+    <li>Java 6+
     <li>Bazaar 2.0+
     <ul>
       <li>xmloutput plugin
@@ -95,6 +95,10 @@
 
   <change-notes>
   <![CDATA[
+  <h3>Changes since 2.6.3</h3>
+  <ul>
+    <li>[feature] Supports IntelliJ IDEA 12.0</li>
+  </ul>
   <h3>Changes since 2.6.1</h3>
   <ul>
     <li>[feature] Supports IntelliJ IDEA 11.0</li>

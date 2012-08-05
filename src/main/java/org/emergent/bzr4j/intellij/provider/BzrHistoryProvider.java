@@ -17,14 +17,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.history.HistoryAsTreeProvider;
-import com.intellij.openapi.vcs.history.VcsAbstractHistorySession;
-import com.intellij.openapi.vcs.history.VcsAppendableHistorySessionPartner;
-import com.intellij.openapi.vcs.history.VcsDependentHistoryComponents;
-import com.intellij.openapi.vcs.history.VcsFileRevision;
-import com.intellij.openapi.vcs.history.VcsHistoryProvider;
-import com.intellij.openapi.vcs.history.VcsHistorySession;
-import com.intellij.openapi.vcs.history.VcsRevisionNumber;
+import com.intellij.openapi.vcs.history.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import com.intellij.util.ui.ColumnInfo;
@@ -32,6 +25,7 @@ import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.intellij.BzrFile;
 import org.emergent.bzr4j.intellij.command.BzrLogCommand;
 import org.emergent.bzr4j.intellij.command.BzrMiscCommand;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.Collections;
@@ -115,6 +109,16 @@ public class BzrHistoryProvider implements VcsHistoryProvider {
   }
 
   public boolean supportsHistoryForDirectories() {
+    return true;
+  }
+
+  @Override
+  public DiffFromHistoryHandler getHistoryDiffHandler() {
+    return null;
+  }
+
+  @Override
+  public boolean canShowHistoryFor(@NotNull VirtualFile file) {
     return true;
   }
 }
