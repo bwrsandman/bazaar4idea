@@ -33,6 +33,10 @@ public class BzrAnnotationProvider implements AnnotationProvider {
   }
 
   public FileAnnotation annotate(VirtualFile file) throws VcsException {
+    return annotate(file, null);
+  }
+
+  public FileAnnotation annotate(VirtualFile file, VcsFileRevision revision) throws VcsException {
     VirtualFile vcsRoot = VcsUtil.getVcsRootFor(project, file);
     if (vcsRoot == null) {
       throw new VcsException("vcs root is null");
@@ -41,14 +45,12 @@ public class BzrAnnotationProvider implements AnnotationProvider {
     BzrAnnotateCommand hgAnnotateCommand = new BzrAnnotateCommand(project);
     BzrLogCommand hgLogCommand = new BzrLogCommand(project);
     return new BzrAnnotation(
+        project,
         hgFile,
         hgAnnotateCommand.execute(hgFile),
-        hgLogCommand.execute(hgFile)
+        hgLogCommand.execute(hgFile),
+        null
     );
-  }
-
-  public FileAnnotation annotate(VirtualFile file, VcsFileRevision revision) throws VcsException {
-    return annotate(file);
   }
 
   public boolean isAnnotationValid(VcsFileRevision rev) {

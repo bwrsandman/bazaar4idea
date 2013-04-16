@@ -13,19 +13,24 @@
 package org.emergent.bzr4j.intellij.provider.annotate;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.annotate.*;
 import com.intellij.openapi.vcs.changes.CurrentContentRevision;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.intellij.BzrFile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BzrAnnotation implements FileAnnotation {
+public class BzrAnnotation extends FileAnnotation {
 
   private static final Logger LOG = Logger.getInstance(BzrAnnotation.class.getName());
 
@@ -42,12 +47,17 @@ public class BzrAnnotation implements FileAnnotation {
 
   private final List<BzrAnnotationLine> lines;
   private final List<VcsFileRevision> vcsFileRevisions;
-  private final BzrFile hgFile;
+  private final BzrFile bzrFile;
+  private final VcsRevisionNumber currentRevision;
 
-  public BzrAnnotation(BzrFile hgFile, List<BzrAnnotationLine> lines, List<VcsFileRevision> vcsFileRevisions) {
+
+  public BzrAnnotation(@NotNull Project project, BzrFile bzrFile, List<BzrAnnotationLine> lines, List<VcsFileRevision> vcsFileRevisions,
+                       VcsRevisionNumber revision) {
+    super(project);
     this.lines = lines;
     this.vcsFileRevisions = vcsFileRevisions;
-    this.hgFile = hgFile;
+    this.bzrFile = bzrFile;
+    this.currentRevision = revision;
   }
 
   public AnnotationSourceSwitcher getAnnotationSourceSwitcher() {
@@ -58,21 +68,21 @@ public class BzrAnnotation implements FileAnnotation {
     return getLineRevisionNumber(lineNumber);
   }
 
+  @Nullable
+  @Override
+  public VcsRevisionNumber getCurrentRevision() {
+    return currentRevision;
+  }
+
   public boolean revisionsNotEmpty() {
     return true;
-  }
-
-  public void addListener(AnnotationListener listener) {
-  }
-
-  public void removeListener(AnnotationListener listener) {
   }
 
   public void dispose() {
   }
 
   public LineAnnotationAspect[] getAspects() {
-    return new LineAnnotationAspect[] {
+    return new LineAnnotationAspect[]{
         revisionAnnotationAspect,
         dateAnnotationAspect,
         userAnnotationAspect
@@ -85,7 +95,7 @@ public class BzrAnnotation implements FileAnnotation {
 
   public String getAnnotatedContent() {
     try {
-      return CurrentContentRevision.create(hgFile.toFilePath()).getContent();
+      return CurrentContentRevision.create(bzrFile.toFilePath()).getContent();
     } catch (VcsException e) {
       LOG.error(e);
       return StringUtils.EMPTY;
@@ -121,10 +131,14 @@ public class BzrAnnotation implements FileAnnotation {
 
   private static String id(FIELD field) {
     switch (field) {
-      case USER: return LineAnnotationAspect.AUTHOR;
-      case REVISION: return LineAnnotationAspect.REVISION;
-      case DATE: return LineAnnotationAspect.DATE;
-      default: return null;
+      case USER:
+        return LineAnnotationAspect.AUTHOR;
+      case REVISION:
+        return LineAnnotationAspect.REVISION;
+      case DATE:
+        return LineAnnotationAspect.DATE;
+      default:
+        return null;
     }
   }
 
@@ -155,5 +169,10 @@ public class BzrAnnotation implements FileAnnotation {
     protected void showAffectedPaths(int lineNum) {
       // todo
     }
+  }
+
+  @Override
+  public VirtualFile getFile() {
+    return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(bzrFile.getFile());
   }
 }
