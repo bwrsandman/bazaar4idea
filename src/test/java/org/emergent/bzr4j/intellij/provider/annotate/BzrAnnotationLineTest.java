@@ -17,6 +17,8 @@
 package org.emergent.bzr4j.intellij.provider.annotate;
 
 import static org.testng.Assert.*;
+
+import bazaar4idea.provider.annotate.BzrAnnotationLine;
 import org.testng.annotations.Test;
 
 import java.util.Calendar;

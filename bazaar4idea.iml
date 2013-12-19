@@ -11,10 +11,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="bzr4j" level="project" />
-    <orderEntry type="library" name="gnumail" level="application" />
-    <orderEntry type="library" name="testng" level="application" />
-    <orderEntry type="library" name="commons-io" level="application" />
+    <orderEntry type="library" exported="" name="bzr4j" level="project" />
+    <orderEntry type="library" exported="" name="gnumail" level="application" />
+    <orderEntry type="library" exported="" name="testng" level="application" />
+    <orderEntry type="library" exported="" name="commons-io" level="application" />
   </component>
 </module>
 

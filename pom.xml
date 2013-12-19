@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.emergent.bzr4j</groupId>
-  <artifactId>bzr4intellij</artifactId>
+  <artifactId>bazaar4idea</artifactId>
   <version>2.6.4-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Bzr4IntelliJ Plugin</name>
+  <name>Bazaar4Idea Plugin</name>
   <url>http://bzr4j.emergent.org/</url>
 
   <properties>
@@ -191,7 +191,7 @@
                 -->
                 <copy todir="${idea.plugins.dir}" preservelastmodified="true">
                   <zipfileset
-                      src="${project.build.directory}/install-bundles/bzr4intellij-zipbundle.zip"/>
+                      src="${project.build.directory}/install-bundles/bazaar4idea-zipbundle.zip"/>
                 </copy>
               </tasks>
             </configuration>
@@ -283,7 +283,7 @@
 
   <profiles>
     <profile>
-      <id>bzr4intellij-jdk15</id>
+      <id>bazaar4idea-jdk15</id>
       <activation>
         <jdk>1.5</jdk>
       </activation>
@@ -292,7 +292,7 @@
       </properties>
     </profile>
     <profile>
-      <id>bzr4intellij-jdk16</id>
+      <id>bazaar4idea-jdk16</id>
       <activation>
         <jdk>[1.6,)</jdk>
       </activation>

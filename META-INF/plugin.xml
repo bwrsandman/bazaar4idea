@@ -1,7 +1,7 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin url="http://launchpad.net/bzr4j">
-  <name>Bzr4IntelliJ</name>
-  <id>bzr4intellij</id>
+  <name>Bazaar4idea</name>
+  <id>bazaar4idea</id>
   <version>${project.version}</version>
   <description>
   <![CDATA[
