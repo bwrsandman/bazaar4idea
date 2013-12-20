@@ -143,7 +143,7 @@ abstract class BzrAbstractFilesAction extends AnAction {
   }
 
   private BzrVcs getBzrVcs(Project project) {
-    return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.VCS_NAME);
+    return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.NAME);
   }
 
 }

@@ -76,7 +76,7 @@ public final class BzrConflictResolver {
       }
       if (updatedFiles != null && fileGroupId != null) {
         updatedFiles.getGroupById(fileGroupId)
-            .add(file.getPath(), BzrVcs.VCS_NAME, incomingRevision);
+            .add(file.getPath(), BzrVcs.NAME, incomingRevision);
       }
     }
 

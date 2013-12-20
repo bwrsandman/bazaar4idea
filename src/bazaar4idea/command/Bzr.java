@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,5 +36,10 @@ public interface Bzr {
   @NotNull
   Set<VirtualFile> untrackedFiles(@NotNull Project project, @NotNull VirtualFile root,
                                   @Nullable Collection<VirtualFile> files) throws VcsException;
+
+  // relativePaths are guaranteed to fit into command line length limitations.
+  @NotNull
+  Collection<VirtualFile> untrackedFilesNoChunk(@NotNull Project project, @NotNull VirtualFile root,
+                                                @Nullable List<String> relativePaths) throws VcsException;
 
 }

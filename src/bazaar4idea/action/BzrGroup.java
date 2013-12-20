@@ -30,12 +30,12 @@ import bazaar4idea.BzrVcs;
 public class BzrGroup extends StandardVcsGroup {
 
   public AbstractVcs getVcs(Project project) {
-    return ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.VCS_NAME);
+    return ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.NAME);
   }
 
   @Override
   public String getVcsName(final Project project) {
-    return BzrVcs.VCS_NAME;
+    return BzrVcs.NAME;
   }
 
   @Override
@@ -58,7 +58,7 @@ public class BzrGroup extends StandardVcsGroup {
       return;
     }
 
-    BzrVcs vcs = (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.VCS_NAME);
+    BzrVcs vcs = (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(BzrVcs.NAME);
 
     if (!vcs.isStarted()) {
       presentation.setEnabled(false);

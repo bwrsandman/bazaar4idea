@@ -109,7 +109,7 @@ class BzrRegularUpdater implements BzrUpdater {
         String filePath = (new File(bzrRoot.getPath(), relPath)).getAbsolutePath();
         String fileGroupId = entry.getValue();
         LOG.debug("adding updatedFile: " + fileGroupId + " \"" + relPath + "\"");
-        updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.VCS_NAME, revno);
+        updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.NAME, revno);
       }
     }
 

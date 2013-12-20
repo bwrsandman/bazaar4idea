@@ -100,7 +100,7 @@ final class BzrHeadMerger {
           if (fileGroupId != null) {
             String filePath = (new File(workDir, change.m_path)).getAbsolutePath();
 //            LOG.debug("adding updatedFile: " + fileGroupId + " " + filePath);
-            updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.VCS_NAME, vcsRevNo);
+            updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.NAME, vcsRevNo);
           }
         }
       }, repo);
@@ -128,7 +128,7 @@ final class BzrHeadMerger {
 //        filePath = afterFile.getFile().getAbsolutePath();
 //      }
 //      if (fileGroupId != null && filePath != null) {
-//        updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.VCS_NAME, vcsRevNo);
+//        updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.NAME, vcsRevNo);
 //      }
 //    }
   }

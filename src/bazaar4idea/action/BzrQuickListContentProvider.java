@@ -37,7 +37,7 @@ public class BzrQuickListContentProvider implements VcsQuickListContentProvider 
   public List<AnAction> getVcsActions(@Nullable Project project, @Nullable AbstractVcs activeVcs,
                                       @Nullable DataContext dataContext) {
 
-    if (activeVcs == null || !BzrVcs.VCS_NAME.equals(activeVcs.getName())) {
+    if (activeVcs == null || !BzrVcs.NAME.equals(activeVcs.getName())) {
       return null;
     }
 
@@ -81,7 +81,7 @@ public class BzrQuickListContentProvider implements VcsQuickListContentProvider 
   }
 
   public boolean replaceVcsActionsFor(@NotNull AbstractVcs activeVcs, @Nullable DataContext dataContext) {
-    if (!BzrVcs.VCS_NAME.equals(activeVcs.getName())) {
+    if (!BzrVcs.NAME.equals(activeVcs.getName())) {
       return false;
     }
     return true;

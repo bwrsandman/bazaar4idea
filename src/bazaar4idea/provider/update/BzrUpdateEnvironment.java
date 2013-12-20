@@ -12,6 +12,10 @@
 // limitations under the License.
 package bazaar4idea.provider.update;
 
+import bazaar4idea.BzrPlatformFacade;
+import bazaar4idea.BzrVcs;
+import bazaar4idea.config.BzrVcsSettings;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -37,12 +41,18 @@ public class BzrUpdateEnvironment implements UpdateEnvironment {
 
   private static final Logger LOG = Logger.getInstance(BzrUpdateEnvironment.class.getName());
 
-  private final Project m_project;
-  private final BzrUpdaterFactory m_updaterFactory;
+  private final BzrVcs myVcs;
+  private final Project myProject;
+  private final BzrVcsSettings mySettings;
+  private final BzrUpdaterFactory myUpdaterFactory;
+  @NotNull private final BzrPlatformFacade myPlatformFacade;
 
-  public BzrUpdateEnvironment(Project project) {
-    m_project = project;
-    m_updaterFactory = new BzrUpdaterFactory(project);
+  public BzrUpdateEnvironment(Project project, @NotNull  BzrVcs vcs, BzrVcsSettings settings) {
+    myVcs = vcs;
+    myProject = project;
+    mySettings = settings;
+    myPlatformFacade = ServiceManager.getService(project, BzrPlatformFacade.class);
+    myUpdaterFactory = new BzrUpdaterFactory(project);
   }
 
   public void fillGroups(UpdatedFiles updatedFiles) {
@@ -61,13 +71,13 @@ public class BzrUpdateEnvironment implements UpdateEnvironment {
       if (indicator != null) {
         indicator.startNonCancelableSection();
       }
-      VirtualFile repository = ProjectLevelVcsManager.getInstance(m_project).getVcsRootFor(contentRoot);
-//      VirtualFile repository = VcsUtil.getVcsRootFor(m_project,contentRoot);
+      VirtualFile repository = ProjectLevelVcsManager.getInstance(myProject).getVcsRootFor(contentRoot);
+//      VirtualFile repository = VcsUtil.getVcsRootFor(myProject,contentRoot);
       if (repository == null) {
         continue;
       }
       try {
-        m_updaterFactory.buildUpdater(repository).update(updatedFiles, indicator);
+        myUpdaterFactory.buildUpdater(repository).update(updatedFiles, indicator);
       } catch (VcsException e) {
         exceptions.add(e);
       }

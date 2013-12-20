@@ -16,14 +16,20 @@
 
 package bazaar4idea;
 
+import bazaar4idea.command.Bzr;
 import bazaar4idea.config.BzrExecutableValidator;
+import bazaar4idea.config.BzrVcsApplicationSettings;
+import bazaar4idea.config.BzrVcsSettings;
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.diff.impl.patch.formove.FilePathComparator;
+import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManagerAdapter;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
@@ -39,7 +45,6 @@ import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.VcsKey;
 import com.intellij.openapi.vcs.annotate.AnnotationProvider;
-import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.ChangeProvider;
 import com.intellij.openapi.vcs.changes.ui.ChangesViewContentManager;
 import com.intellij.openapi.vcs.checkin.CheckinEnvironment;
@@ -67,8 +72,6 @@ import bazaar4idea.provider.BzrHistoryProvider;
 import bazaar4idea.provider.BzrRollbackEnvironment;
 import bazaar4idea.provider.annotate.BzrAnnotationProvider;
 import bazaar4idea.provider.commit.BzrCheckinEnvironment;
-import bazaar4idea.provider.commit.BzrCommitExecutor;
-import bazaar4idea.provider.update.BzrIntegrateEnvironment;
 import bazaar4idea.provider.update.BzrUpdateEnvironment;
 import bazaar4idea.ui.BzrChangesetStatus;
 import bazaar4idea.ui.BzrCurrentBranchStatus;
@@ -80,9 +83,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Patrick Woodworth
@@ -95,9 +102,9 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 
   static final Logger LOG = Logger.getInstance(BzrVcs.class.getName());
 
-  public static final String VCS_NAME = "Bazaar";
+  public static final String NAME = "Bazaar";
 
-  private final static VcsKey ourKey = createKey(VCS_NAME);
+  private final static VcsKey ourKey = createKey(NAME);
 
   public static final Topic<BzrUpdater> BRANCH_TOPIC = new Topic<BzrUpdater>("bzr4intellij.branch", BzrUpdater.class);
   public static final Topic<BzrUpdater> INCOMING_TOPIC =
@@ -109,37 +116,40 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   public static final Icon INCOMING_ICON = IconLoader.getIcon("/actions/moveDown.png");
   public static final Icon OUTGOING_ICON = IconLoader.getIcon("/actions/moveUp.png");
 
+  private static final int MAX_CONSOLE_OUTPUT_SIZE = 10000;
+
   private static final String ourRevisionPattern = "\\d+(\\.\\d+)*";
+  private final ReadWriteLock myCommandLock = new ReentrantReadWriteLock(true); // The command read/write lock
+  private final AnnotationProvider myAnnotationProvider;
 
-  private final AnnotationProvider m_annotationProvider;
+  private final DiffProvider myDiffProvider;
 
-  private final DiffProvider m_diffProvider;
+  private final CheckinEnvironment myCheckinEnvironment;
 
-  private final CheckinEnvironment m_checkinEnvironment;
+  private final ChangeProvider myChangeProvider;
 
-  private final ChangeProvider m_changeProvider;
+  private final VcsHistoryProvider myHistoryProvider;
+  @NotNull private final Bzr myBzr;
+  private final RollbackEnvironment myRollbackEnvironment;
 
-  private final VcsHistoryProvider m_vcsHistoryProvider;
+  private final UpdateEnvironment myUpdateEnvironment;
+//  private final BzrIntegrateEnvironment myIntegrateEnvironment;
 
-  private final RollbackEnvironment m_rollbackEnvironment;
-
-  private final MergeProvider m_mergeProvider;
-
-  private final UpdateEnvironment updateEnvironment;
-  private final BzrIntegrateEnvironment integrateEnvironment;
-
-  private final BzrProjectConfigurable m_configurable;
+//  private final BzrProjectConfigurable myConfigurable;
 
   private Disposable m_activationDisposable;
 
-  private BzrVirtualFileListener virtualFileListener;
+  private final ProjectLevelVcsManager myVcsManager;
+
+  private BzrVirtualFileListener myVirtualFileListener;
   private final BzrExecutableValidator myExecutableValidator;
-  private final BzrCommitExecutor commitExecutor;
+//  private final BzrCommitExecutor myCommitExecutor;
   private final BzrCurrentBranchStatus hgCurrentBranchStatus = new BzrCurrentBranchStatus();
   private final BzrChangesetStatus incomingChangesStatus = new BzrChangesetStatus(BzrVcs.INCOMING_ICON);
   private final BzrChangesetStatus outgoingChangesStatus = new BzrChangesetStatus(BzrVcs.OUTGOING_ICON);
   private MessageBusConnection messageBusConnection;
   private ScheduledFuture<?> changesUpdaterScheduledFuture;
+  private BzrVcsApplicationSettings myAppSettings;
 
   /**
    * The tracker that checks validity of git roots
@@ -154,39 +164,74 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   private boolean started;
 
   public static BzrVcs getInstance(@NotNull Project project) {
-    return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(VCS_NAME);
+    return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(NAME);
   }
 
   public BzrVcs(@NotNull final Project project) {
-    super(project, VCS_NAME);
+    super(project, NAME);
 
-    m_configurable = new BzrProjectConfigurable(project);
-    m_changeProvider = new BzrChangeProvider(project, getKeyInstanceMethod());
-    virtualFileListener = new BzrVirtualFileListener(project, this);
-    m_rollbackEnvironment = new BzrRollbackEnvironment(project);
-    m_diffProvider = new BzrDiffProvider(project);
-    m_vcsHistoryProvider = new BzrHistoryProvider(project);
-    m_checkinEnvironment = new BzrCheckinEnvironment(project);
-    m_annotationProvider = new BzrAnnotationProvider(project);
-    commitExecutor = new BzrCommitExecutor(project);
+//    myConfigurable = new BzrProjectConfigurable(project);
+    myChangeProvider = new BzrChangeProvider(project, getKeyInstanceMethod());
+    myVirtualFileListener = new BzrVirtualFileListener(project, this);
+    myRollbackEnvironment = new BzrRollbackEnvironment(project);
+    myDiffProvider = new BzrDiffProvider(project);
+    myHistoryProvider = new BzrHistoryProvider(project);
+    myCheckinEnvironment = new BzrCheckinEnvironment(project);
+    myAnnotationProvider = new BzrAnnotationProvider(project);
+//    myCommitExecutor = new BzrCommitExecutor(project);
 
-    m_mergeProvider = null;
-    updateEnvironment = new BzrUpdateEnvironment(project);
-    integrateEnvironment = BzrDebug.EXPERIMENTAL_ENABLED ? new BzrIntegrateEnvironment(project) : null;
+    myUpdateEnvironment = new BzrUpdateEnvironment(project, this, null);
+//    myIntegrateEnvironment = BzrDebug.EXPERIMENTAL_ENABLED ? new BzrIntegrateEnvironment(project) : null;
     myExecutableValidator = new BzrExecutableValidator(myProject, this);
+    myVcsManager = null;
+    myBzr = null;
 //        LogUtil.dumpImportantData(new Properties());
+  }
+
+  public BzrVcs(@NotNull Project project,
+                @NotNull Bzr bzr,
+                @NotNull final ProjectLevelVcsManager bzrVcsManager,
+                @NotNull final BzrAnnotationProvider bzrAnnotationProvider,
+                @NotNull final BzrDiffProvider bzrDiffProvider,
+                @NotNull final BzrHistoryProvider bzrHistoryProvider,
+                @NotNull final BzrRollbackEnvironment bzrRollbackEnvironment,
+                @NotNull final BzrVcsApplicationSettings bzrSettings,
+                @NotNull final BzrVcsSettings bzrProjectSettings) {
+    super(project, NAME);
+    myBzr = bzr;
+    myVcsManager = bzrVcsManager;
+    myAppSettings = bzrSettings;
+    myChangeProvider = project.isDefault() ? null : ServiceManager.getService(project, BzrChangeProvider.class);
+    myCheckinEnvironment = project.isDefault() ? null : ServiceManager.getService(project, BzrCheckinEnvironment.class);
+    myAnnotationProvider = bzrAnnotationProvider;
+    myDiffProvider = bzrDiffProvider;
+    myHistoryProvider = bzrHistoryProvider;
+    myRollbackEnvironment = bzrRollbackEnvironment;
+//    myRevSelector = new BzrRevisionSelector();
+//    myConfigurable = new BzrVcsConfigurable(bzrProjectSettings, myProject);
+    myUpdateEnvironment = new BzrUpdateEnvironment(myProject, this, bzrProjectSettings);
+//    myCommittedChangeListProvider = new BzrCommittedChangeListProvider(myProject);
+//    myOutgoingChangesProvider = new BzrOutgoingChangesProvider(myProject);
+//    myTreeDiffProvider = new BzrTreeDiffProvider(myProject);
+//    myCommitAndPushExecutor = new BzrCommitAndPushExecutor(myCheckinEnvironment);
+    myExecutableValidator = new BzrExecutableValidator(myProject, this);
+//    myPlatformFacade = ServiceManager.getService(myProject, BzrPlatformFacade.class);
+  }
+
+  public ReadWriteLock getCommandLock() {
+    return myCommandLock;
   }
 
   @NonNls
   public String getDisplayName() {
-    return m_configurable.getDisplayName();
+    return NAME;
   }
 
   public void dispose() {
   }
 
   public Configurable getConfigurable() {
-    return m_configurable;
+    return null;
   }
 
   @Nullable
@@ -210,21 +255,21 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     if (!started) {
       return null;
     }
-    return m_diffProvider;
+    return myDiffProvider;
   }
 
   public AnnotationProvider getAnnotationProvider() {
     if (!started) {
       return null;
     }
-    return m_annotationProvider;
+    return myAnnotationProvider;
   }
 
   public VcsHistoryProvider getVcsHistoryProvider() {
     if (!started) {
       return null;
     }
-    return m_vcsHistoryProvider;
+    return myHistoryProvider;
   }
 
   public VcsHistoryProvider getVcsBlockHistoryProvider() {
@@ -238,28 +283,28 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     if (!started) {
       return null;
     }
-    return m_changeProvider;
+    return myChangeProvider;
   }
 
   public MergeProvider getMergeProvider() {
     if (!started) {
       return null;
     }
-    return m_mergeProvider;
+    return null;
   }
 
   public RollbackEnvironment getRollbackEnvironment() {
     if (!started) {
       return null;
     }
-    return m_rollbackEnvironment;
+    return myRollbackEnvironment;
   }
 
   public CheckinEnvironment getCheckinEnvironment() {
     if (!started) {
       return null;
     }
-    return m_checkinEnvironment;
+    return myCheckinEnvironment;
   }
 
   @Override
@@ -268,7 +313,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
       return null;
     }
 
-    return updateEnvironment;
+    return myUpdateEnvironment;
   }
 
   @Override
@@ -277,7 +322,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
       return null;
     }
 
-    return integrateEnvironment;
+    return null;
   }
 
   @Override
@@ -367,14 +412,14 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     }
 
     LocalFileSystem lfs = LocalFileSystem.getInstance();
-    lfs.addVirtualFileListener(virtualFileListener);
-    lfs.registerAuxiliaryFileOperationsHandler(virtualFileListener);
-    CommandProcessor.getInstance().addCommandListener(virtualFileListener);
+    lfs.addVirtualFileListener(myVirtualFileListener);
+    lfs.registerAuxiliaryFileOperationsHandler(myVirtualFileListener);
+    CommandProcessor.getInstance().addCommandListener(myVirtualFileListener);
 
     BzrGlobalSettings globalSettings = BzrGlobalSettings.getInstance();
     BzrProjectSettings projectSettings = BzrProjectSettings.getInstance(myProject);
 
-    ChangeListManager.getInstance(myProject).registerCommitExecutor(commitExecutor);
+//    ChangeListManager.getInstance(myProject).registerCommitExecutor(myCommitExecutor);
 
     StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
     if (statusBar != null) {
@@ -454,9 +499,9 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     }
 
     LocalFileSystem lfs = LocalFileSystem.getInstance();
-    lfs.removeVirtualFileListener(virtualFileListener);
-    lfs.unregisterAuxiliaryFileOperationsHandler(virtualFileListener);
-    CommandProcessor.getInstance().removeCommandListener(virtualFileListener);
+    lfs.removeVirtualFileListener(myVirtualFileListener);
+    lfs.unregisterAuxiliaryFileOperationsHandler(myVirtualFileListener);
+    CommandProcessor.getInstance().removeCommandListener(myVirtualFileListener);
 
     StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
     if (messageBusConnection != null) {
@@ -511,6 +556,41 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   @NotNull
   public BzrExecutableValidator getExecutableValidator() {
     return myExecutableValidator;
+  }
+
+  /**
+   * Shows a plain message in the Version Control Console.
+   */
+  public void showMessages(@NotNull String message) {
+    if (message.length() == 0) return;
+    showMessage(message, ConsoleViewContentType.NORMAL_OUTPUT.getAttributes());
+  }
+
+  /**
+   * Shows error message in the Version Control Console
+   */
+  public void showErrorMessages(final String line) {
+    showMessage(line, ConsoleViewContentType.ERROR_OUTPUT.getAttributes());
+  }
+
+  /**
+   * Show message in the Version Control Console
+   * @param message a message to show
+   * @param style   a style to use
+   */
+  private void showMessage(@NotNull String message, final TextAttributes style) {
+    if (message.length() > MAX_CONSOLE_OUTPUT_SIZE) {
+      message = message.substring(0, MAX_CONSOLE_OUTPUT_SIZE);
+    }
+    myVcsManager.addMessageToConsoleWindow(message, style);
+  }
+
+  /**
+   * Shows a command line message in the Version Control Console
+   */
+  public void showCommandLine(final String cmdLine) {
+    SimpleDateFormat f = new SimpleDateFormat("HH:mm:ss.SSS");
+    showMessage(f.format(new Date()) + ": " + cmdLine, ConsoleViewContentType.SYSTEM_OUTPUT.getAttributes());
   }
 
 }

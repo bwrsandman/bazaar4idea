@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package bazaar4idea.action;
+package bazaar4idea.command;
 
-import bazaar4idea.BzrVcs;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.AbstractVcs;
-import com.intellij.openapi.vcs.actions.StandardVcsGroup;
+import com.intellij.openapi.vcs.ProcessEventListener;
 
 /**
- * Bazaar VCS menu
+ * Listener for event common for all handlers
  */
-public class BzrMenu extends StandardVcsGroup {
-  @Override
-  public AbstractVcs getVcs(Project project) {
-    return BzrVcs.getInstance(project);
-  }
-
-  @Override
-  public String getVcsName(final Project project) {
-    return BzrVcs.NAME;
-  }
+public interface BzrHandlerListener extends ProcessEventListener {
 }
