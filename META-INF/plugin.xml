@@ -171,8 +171,8 @@
     <vcs name="Bazaar" vcsClass="bazaar4idea.BzrVcs" displayName="Bazaar" administrativeAreaName=".bzr"/>
     <checkoutProvider implementation="bazaar4idea.checkout.BzrCheckoutProvider"/>
     <vcsRootChecker implementation="bazaar4idea.roots.BzrRootChecker"/>
-    <!--<vcsPopupProvider implementation="bazaar4idea.actions.BazaarQuickListContentProvider"/>-->
-    <!--<vcsCheckinHandlerFactory implementation="bazaar4idea.checkin.BazaarCheckinHandlerFactory"/>-->
+    <vcsPopupProvider implementation="bazaar4idea.action.BzrQuickListContentProvider"/>
+    <vcsCheckinHandlerFactory implementation="bazaar4idea.checkin.BzrCheckinHandlerFactory"/>
     <!--<checkinHandlerFactory implementation="bazaar4idea.checkin.UnresolvedMergeCheckFactory"/>-->
     <!--<logProvider implementation="bazaar4idea.log.BazaarLogProvider"/>-->
     <vcsChangesViewRefresher implementation="bazaar4idea.changes.BzrChangesViewRefresher" />
