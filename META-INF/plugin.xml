@@ -84,27 +84,27 @@
       <separator/>
     </group>
 
-    <!--
-    <group id="Git.Menu" class="git4idea.actions.GitMenu" popup="true" text="_Git">
-      <reference ref="GitFileActions"/>
+    <group id="Bazaar.Menu" class="bazaar4idea.action.BzrMenu" popup="true" text="_Bazaar">
+      <reference ref="BazaarFileActions"/>
       <separator/>
-      <reference ref="GitRepositoryActions"/>
+      <reference ref="BazaarRepositoryActions"/>
 
       <add-to-group group-id="VcsGlobalGroup" anchor="after" relative-to-action="Vcs.Specific"/>
     </group>
 
-    <group id="Git.ContextMenu" class="git4idea.actions.GitMenu" popup="true" text="_Git">
-      <reference ref="GitFileActions"/>
+    <group id="Bazaar.ContextMenu" class="bazaar4idea.action.BzrMenu" popup="true" text="_Bazaar">
+      <reference ref="BazaarFileActions"/>
       <separator/>
-      <group id="Git.RepositoryContextMenu" popup="true" text="_Repository">
-        <reference ref="GitRepositoryActions"/>
+      <group id="Bazaar.RepositoryContextMenu" popup="true" text="_Repository">
+        <reference ref="BazaarRepositoryActions"/>
       </group>
       <add-to-group group-id="VcsGroup" anchor="last"/>
     </group>
 
-    <group id="Git.LogContextMenu">
+    <group id="Bazaar.LogContextMenu">
       <separator/>
     </group>
+    <!--
 
     <action id="Git.CherryPick" class="git4idea.cherrypick.GitCherryPickAction" text="Cherry-Pick" icon="Git4ideaIcons.CherryPick"/>
     <action class="git4idea.actions.GitCheckoutRevisionAction" id="Git.CheckoutRevision" text="Checkout Revision"/>
