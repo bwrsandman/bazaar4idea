@@ -169,8 +169,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <errorHandler implementation="com.intellij.diagnostic.ITNReporter"/>
     <vcs name="Bazaar" vcsClass="bazaar4idea.BzrVcs" displayName="Bazaar" administrativeAreaName=".bzr"/>
-    <!--<checkoutProvider implementation="bazaar4idea.checkout.GitCheckoutProvider"/>-->
-    <!--<vcsRootChecker implementation="bazaar4idea.roots.BazaarRootChecker"/>-->
+    <checkoutProvider implementation="bazaar4idea.checkout.BzrCheckoutProvider"/>
+    <vcsRootChecker implementation="bazaar4idea.roots.BzrRootChecker"/>
     <!--<vcsPopupProvider implementation="bazaar4idea.actions.BazaarQuickListContentProvider"/>-->
     <!--<vcsCheckinHandlerFactory implementation="bazaar4idea.checkin.BazaarCheckinHandlerFactory"/>-->
     <!--<checkinHandlerFactory implementation="bazaar4idea.checkin.UnresolvedMergeCheckFactory"/>-->
