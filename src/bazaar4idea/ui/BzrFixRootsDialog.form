@@ -18,7 +18,7 @@
           <component id="704d2" class="javax.swing.JList" binding="myGitRoots">
             <constraints/>
             <properties>
-              <toolTipText resource-bundle="org/emergent/bzr4j/intellij/BzrVcsMessages" key="fix.roots.list.tooltip"/>
+              <toolTipText resource-bundle="bazaar4idea/i18n/BzrBundle" key="fix.roots.list.tooltip"/>
             </properties>
           </component>
         </children>

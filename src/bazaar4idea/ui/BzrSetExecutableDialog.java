@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.ui;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -19,7 +20,6 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import bazaar4idea.BzrVcsMessages;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,9 +38,9 @@ public class BzrSetExecutableDialog extends DialogWrapper {
   public BzrSetExecutableDialog(Project project) {
     super(project, false);
     Object[] params1 = new Object[] { };
-    String title = BzrVcsMessages.message("bzr4intellij.configuration.title", params1);
+    String title = BzrBundle.message("bzr4intellij.configuration.title", params1);
     Object[] params = new Object[] { };
-    String description = BzrVcsMessages.message("bzr4intellij.configuration.description", params);
+    String description = BzrBundle.message("bzr4intellij.configuration.description", params);
 
     hgExecutablePath.addBrowseFolderListener(
         title, description, null,
@@ -57,7 +57,7 @@ public class BzrSetExecutableDialog extends DialogWrapper {
   public void setBadHgPath(String hgPath) {
     hgExecutablePath.setText(hgPath);
     Object[] params = new Object[] { hgPath };
-    errorLabel.setText(BzrVcsMessages.message("bzr4intellij.error.invalidExecutable", params));
+    errorLabel.setText(BzrBundle.message("bzr4intellij.error.invalidExecutable", params));
   }
 
   public String getNewHgPath() {

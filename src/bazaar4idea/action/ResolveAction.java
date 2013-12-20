@@ -52,7 +52,7 @@ import com.intellij.util.Processor;
 import com.intellij.vcsUtil.VcsRunnable;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.command.BzrResolveCommand;
 import org.jetbrains.annotations.NotNull;
 
@@ -111,7 +111,7 @@ public class ResolveAction extends BzrAbstractFilesAction {
             }
           }
         }
-      }, BzrVcsMessages.message("progress.searching.for.files.with.conflicts"), true, project);
+      }, BzrBundle.message("progress.searching.for.files.with.conflicts"), true, project);
     }
     AbstractVcsHelper.getInstance(project).showMergeDialog(fileList, buildMergeProvider(project));
   }

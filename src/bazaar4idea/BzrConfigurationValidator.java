@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
@@ -66,8 +67,8 @@ class BzrConfigurationValidator {
       UIUtil.invokeLaterIfNeeded(new Runnable() {
         public void run() {
           m_exeNotification = new Notification(BZR_INVALID_CONFIG_ID,
-              BzrVcsMessages.message("exe.tracker.message.title"),
-              BzrVcsMessages.message("exe.tracker.message"),
+              BzrBundle.message("exe.tracker.message.title"),
+              BzrBundle.message("exe.tracker.message"),
               NotificationType.ERROR,
               new NotificationListener() {
                 public void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {

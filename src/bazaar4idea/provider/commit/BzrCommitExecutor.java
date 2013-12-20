@@ -16,7 +16,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.changes.CommitExecutor;
 import com.intellij.openapi.vcs.changes.CommitSession;
 import com.intellij.util.ui.EmptyIcon;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,13 +38,13 @@ public class BzrCommitExecutor implements CommitExecutor {
   @Nls
   public String getActionText() {
     Object[] params = new Object[] { };
-    return BzrVcsMessages.message("bzr4intellij.commit.repository.title", params);
+    return BzrBundle.message("bzr4intellij.commit.repository.title", params);
   }
 
   @Nls
   public String getActionDescription() {
     Object[] params = new Object[] { };
-    return BzrVcsMessages.message("bzr4intellij.commit.repository.body", params);
+    return BzrBundle.message("bzr4intellij.commit.repository.body", params);
   }
 
   @NotNull

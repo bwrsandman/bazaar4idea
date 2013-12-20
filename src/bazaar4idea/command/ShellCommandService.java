@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.command;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -22,7 +23,6 @@ import org.emergent.bzr4j.core.cli.BzrStandardResult;
 import org.emergent.bzr4j.core.cli.BzrXmlResult;
 import org.emergent.bzr4j.core.xmloutput.XmlPluginHandler;
 import bazaar4idea.BzrGlobalSettings;
-import bazaar4idea.BzrVcsMessages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,7 +133,7 @@ public final class ShellCommandService extends BzrExecService<BzrIdeaExec> {
 
     StringBuilder message = new StringBuilder();
     Object[] params1 = new Object[] { settings.getBzrExecutable() };
-    message.append(BzrVcsMessages.message("bzr4intellij.command.executable.error", params1))
+    message.append(BzrBundle.message("bzr4intellij.command.executable.error", params1))
         .append("\n")
         .append("Original Error:\n")
         .append(e.getMessage());
@@ -142,7 +142,7 @@ public final class ShellCommandService extends BzrExecService<BzrIdeaExec> {
     VcsImplUtil.showErrorMessage(
         project,
         message.toString(),
-        BzrVcsMessages.message("bzr4intellij.error", params)
+        BzrBundle.message("bzr4intellij.error", params)
     );
   }
 

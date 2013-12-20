@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.command.CommandEvent;
 import com.intellij.openapi.command.CommandListener;
 import com.intellij.openapi.fileTypes.FileTypeManager;
@@ -95,9 +96,9 @@ public class BzrVirtualFileListener extends VirtualFileAdapter
       return;
     }
 
-    String title = BzrVcsMessages.message("bzr4intellij.add.confirmation.title");
+    String title = BzrBundle.message("bzr4intellij.add.confirmation.title");
     Object[] params = new Object[] { file.getPath() };
-    String message = BzrVcsMessages.message("bzr4intellij.add.confirmation.body", params);
+    String message = BzrBundle.message("bzr4intellij.add.confirmation.body", params);
 
     ProjectLevelVcsManager vcsMgr = ProjectLevelVcsManager.getInstance(project);
 
@@ -139,8 +140,8 @@ public class BzrVirtualFileListener extends VirtualFileAdapter
       return;
     }
 
-    String title = BzrVcsMessages.message("bzr4intellij.delete.confirmation.title");
-    String message = BzrVcsMessages.message("bzr4intellij.delete.confirmation.body", file.getPath());
+    String title = BzrBundle.message("bzr4intellij.delete.confirmation.title");
+    String message = BzrBundle.message("bzr4intellij.delete.confirmation.body", file.getPath());
 
     VcsShowConfirmationOption option = ProjectLevelVcsManager.getInstance(project)
         .getStandardConfirmation(VcsConfiguration.StandardConfirmation.REMOVE, vcs);

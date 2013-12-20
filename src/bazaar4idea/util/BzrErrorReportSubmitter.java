@@ -16,6 +16,7 @@
 
 package bazaar4idea.util;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -28,7 +29,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import org.emergent.bzr4j.core.BzrMessages;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
-import bazaar4idea.BzrVcsMessages;
 import bazaar4idea.ui.BzrSendErrorForm;
 import org.jetbrains.annotations.NonNls;
 
@@ -63,7 +63,7 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
   @NonNls
   private static final String URL_HEADER = "http://www.intellij.net/tracker/idea/viewSCR?publicId=";
 
-  private static final String ERROR_REPORT = BzrVcsMessages.message("error.report.title");
+  private static final String ERROR_REPORT = BzrBundle.message("error.report.title");
 
 //  private final Timer sm_timer = new Timer("BzrErrorReportSubmitter timer", true);
 
@@ -157,7 +157,7 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
           submissionStatus = SubmittedReportInfo.SubmissionStatus.NEW_ISSUE;
 
           Messages.showInfoMessage(parentComponent,
-              BzrVcsMessages.message("error.report.confirmation"),
+              BzrBundle.message("error.report.confirmation"),
               ERROR_REPORT);
           break;
         } else {
@@ -186,7 +186,7 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
 //        break;
       } catch (Exception e) {
         LOG.info(e);
-        if (Messages.showYesNoDialog(JOptionPane.getRootFrame(), BzrVcsMessages.message("error.report.sending.failure"),
+        if (Messages.showYesNoDialog(JOptionPane.getRootFrame(), BzrBundle.message("error.report.sending.failure"),
             ERROR_REPORT, Messages.getErrorIcon()) != 0) {
           break;
         }

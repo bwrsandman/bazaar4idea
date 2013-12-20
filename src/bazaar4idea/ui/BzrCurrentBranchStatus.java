@@ -14,7 +14,7 @@ package bazaar4idea.ui;
 
 import com.intellij.openapi.util.IconLoader;
 import org.apache.commons.lang.StringUtils;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 
 import javax.swing.*;
 
@@ -30,11 +30,11 @@ public class BzrCurrentBranchStatus extends JLabel {
   public void setCurrentBranch(String branch) {
     Object[] params1 = new Object[] { branch };
     String statusText = StringUtils.isNotBlank(branch)
-        ? BzrVcsMessages.message("bzr4intellij.status.currentBranch.text", params1) : "";
+        ? BzrBundle.message("bzr4intellij.status.currentBranch.text", params1) : "";
 
     Object[] params = new Object[] { };
     String toolTipText = StringUtils.isNotBlank(branch)
-        ? BzrVcsMessages.message("bzr4intellij.status.currentBranch.description", params) : "";
+        ? BzrBundle.message("bzr4intellij.status.currentBranch.description", params) : "";
 
     setVisible(StringUtils.isNotBlank(branch));
     setText(statusText);

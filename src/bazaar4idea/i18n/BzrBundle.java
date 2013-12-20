@@ -13,7 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package bazaar4idea;
+package bazaar4idea.i18n;
 
 import com.intellij.CommonBundle;
 import org.jetbrains.annotations.NonNls;
@@ -26,14 +26,14 @@ import java.util.ResourceBundle;
 /**
  * @author Patrick Woodworth
  */
-public class BzrVcsMessages {
+public class BzrBundle {
 
   private static Reference<ResourceBundle> ourBundle;
 
   @NonNls
-  private static final String BUNDLE = "bazaar4idea.BzrVcsMessages";
+  private static final String BUNDLE = "bazaar4idea.i18n.BzrBundle";
 
-  private BzrVcsMessages() {
+  private BzrBundle() {
   }
 
   public static String message(@PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
@@ -49,4 +49,9 @@ public class BzrVcsMessages {
     }
     return bundle;
   }
+
+  public static String getString(@PropertyKey(resourceBundle = BUNDLE) final String key) {
+    return getBundle().getString(key);
+  }
+
 }

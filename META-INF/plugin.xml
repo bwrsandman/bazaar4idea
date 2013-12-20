@@ -27,10 +27,10 @@
   <actions>
 
     <!-- TODO resolve all comment-outs -->
-    <!--
-    <action id="Bazaar.Init" class="bazaar4idea" text="Create Bazaar Repository...">
+    <action id="Bazaar.Init" class="bazaar4idea.action.BzrInit" text="Create Bazaar Repository...">
       <add-to-group group-id="Vcs.Import"/>
     </action>
+    <!--
 
     <action id="Bazaar.Log" class="bazaar4idea.history.wholeTree.SelectRepositoryAndShowLogAction">
       <add-to-group group-id="Vcs.Browse"/>
@@ -39,7 +39,7 @@
 
     <group id="BazaarFileActions">
       <reference ref="CheckinFiles"/>
-      <action id="Bazaar.Add" class="bazaar4idea.action.AddAction" text="Add" icon="AllIcons.General.Add" use-shortcut-of="ChangesView.AddUnversioned" />
+      <action id="Bazaar.Add" class="bazaar4idea.action.BzrAction" text="Add" icon="AllIcons.General.Add" use-shortcut-of="ChangesView.AddUnversioned" />
       <separator/>
       <reference ref="Annotate"/>
       <reference ref="Show.Current.Revision"/>
@@ -151,7 +151,7 @@
       <implementation-class>bazaar4idea.BzrProjectSettings</implementation-class>
     </component>
   </project-components>
-  <resource-bundle>bazaar4idea.BzrVcsMessages</resource-bundle>
+  <resource-bundle>bazaar4idea.i18n.BzrBundle</resource-bundle>
 
   <extensions defaultExtensionNs="com.intellij">
     <vcs name="Bazaar" vcsClass="bazaar4idea.BzrVcs"/>

@@ -41,7 +41,6 @@ import java.util.WeakHashMap;
 public class BzrUtil {
   public static final String DOT_BZR = ".bzr";
   private static final Logger LOG = Logger.getInstance(BzrUtil.class.getName());
-
   private static final Map<String,File> sm_rootFileCache = new WeakHashMap<String, File>();
 
   /**
@@ -195,7 +194,6 @@ public class BzrUtil {
     return relativePath(root, VfsUtil.virtualToIoFile(file));
   }
 
-
   /**
    * Get relative path
    *
@@ -207,9 +205,6 @@ public class BzrUtil {
   public static String relativePath(final File root, File path) {
     return BzrCoreUtil.relativePath(root, path);
   }
-
-
-
 
   private static class UnusedUtil {
 
@@ -398,6 +393,16 @@ public class BzrUtil {
   @NotNull
   public static BzrRepositoryManager getRepositoryManager(@NotNull Project project) {
     return ServiceManager.getService(project, BzrRepositoryManager.class);
+  }
+
+  /**
+   * Check if the virtual file under Bazaar
+   *
+   * @param vFile a virtual file
+   * @return true if the file is under Bazaar
+   */
+  public static boolean isUnderBzr(final VirtualFile vFile) {
+    return bzrRootOrNull(vFile) != null;
   }
 
 }

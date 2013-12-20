@@ -1,5 +1,6 @@
 package bazaar4idea.ui;
 
+import bazaar4idea.*;
 import com.intellij.ProjectTopics;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
@@ -35,11 +36,7 @@ import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
-import bazaar4idea.BzrProjectSettings;
-import bazaar4idea.BzrRootsListener;
-import bazaar4idea.BzrUtil;
-import bazaar4idea.BzrVcs;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -291,8 +288,8 @@ public class BzrRootTracker implements VcsListener {
       UIUtil.invokeLaterIfNeeded(new Runnable() {
         public void run() {
           myNotification = new Notification(BZR_INVALID_ROOTS_ID,
-              BzrVcsMessages.message("root.tracker.message.title"),
-              BzrVcsMessages.message("root.tracker.message"),
+              BzrBundle.message("root.tracker.message.title"),
+              BzrBundle.message("root.tracker.message"),
               NotificationType.ERROR,
               new NotificationListener() {
                 public void hyperlinkUpdate(@NotNull Notification notification, @NotNull HyperlinkEvent event) {
@@ -461,7 +458,7 @@ public class BzrRootTracker implements VcsListener {
 
     if (added.isEmpty() && removed.isEmpty()) {
       Messages.showInfoMessage(myProject,
-          BzrVcsMessages.message("fix.roots.valid.message"), BzrVcsMessages.message("fix.roots.valid.title"));
+          BzrBundle.message("fix.roots.valid.message"), BzrBundle.message("fix.roots.valid.title"));
       return true;
     }
     BzrFixRootsDialog d = new BzrFixRootsDialog(myProject, mapped, added, removed);

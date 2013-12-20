@@ -1,5 +1,6 @@
 package bazaar4idea.ui;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.CommonBundle;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
@@ -7,7 +8,6 @@ import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.TextComponentUndoProvider;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import bazaar4idea.BzrVcsMessages;
 import bazaar4idea.util.BzrErrorReportConfigurable;
 
 import javax.swing.*;
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class BzrSendErrorForm extends DialogWrapper {
 
-  private static final String ERROR_REPORT = BzrVcsMessages.message("error.report.title");
+  private static final String ERROR_REPORT = BzrBundle.message("error.report.title");
 
   private static final Pattern EMAIL_VALIDATION_PATTERN = Pattern.compile(".+@.+\\.[a-z]+");
 
@@ -81,7 +81,7 @@ public class BzrSendErrorForm extends DialogWrapper {
   protected void init() {
     setTitle(ERROR_REPORT);
     getContentPane().add(myMainPanel);
-    mySendAction = new AbstractAction(BzrVcsMessages.message("diagnostic.error.report.send")) {
+    mySendAction = new AbstractAction(BzrBundle.message("diagnostic.error.report.send")) {
       public void actionPerformed(ActionEvent e) {
         myShouldSend = true;
         storeInfo();

@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.provider.commit;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.FilePath;
@@ -27,7 +28,6 @@ import com.intellij.util.NullableFunction;
 import com.intellij.util.PairConsumer;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
-import bazaar4idea.BzrVcsMessages;
 import bazaar4idea.command.BzrAddCommand;
 import bazaar4idea.command.BzrCommandException;
 import bazaar4idea.command.BzrCommitCommand;
@@ -67,7 +67,7 @@ public class BzrCheckinEnvironment implements CheckinEnvironment {
 
   public String getCheckinOperationName() {
     Object[] params = new Object[] { };
-    return BzrVcsMessages.message("bzr4intellij.commit", params);
+    return BzrBundle.message("bzr4intellij.commit", params);
   }
 
   public List<VcsException> commit(List<Change> changes, String preparedComment) {

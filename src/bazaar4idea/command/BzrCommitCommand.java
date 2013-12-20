@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.command;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -19,7 +20,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.lang.StringUtils;
 import bazaar4idea.BzrFile;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.BzrVcsMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -56,7 +56,7 @@ public class BzrCommitCommand {
   public void execute() throws BzrCommandException {
     if (StringUtils.isBlank(message)) {
       Object[] params = new Object[] { };
-      throw new BzrCommandException(BzrVcsMessages.message("bzr4intellij.commit.error.messageEmpty", params));
+      throw new BzrCommandException(BzrBundle.message("bzr4intellij.commit.error.messageEmpty", params));
     }
     try {
       List<String> parameters = new LinkedList<String>();

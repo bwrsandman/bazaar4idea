@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.provider.commit;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.changes.Change;
@@ -22,7 +23,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsImplUtil;
 import com.intellij.vcsUtil.VcsUtil;
 import org.apache.commons.lang.StringUtils;
-import bazaar4idea.BzrVcsMessages;
 import bazaar4idea.command.BzrCommandException;
 import bazaar4idea.command.BzrCommitCommand;
 
@@ -59,7 +59,7 @@ public class BzrCommitSession implements CommitSession {
         command.execute();
         Object[] params = new Object[] { root.getPath() };
         VcsUtil.showStatusMessage(
-            project, BzrVcsMessages.message("bzr4intellij.commit.success", params)
+            project, BzrBundle.message("bzr4intellij.commit.success", params)
         );
         VcsDirtyScopeManager vcsDirtyScopeManager = VcsDirtyScopeManager.getInstance(project);
         vcsDirtyScopeManager.dirDirtyRecursively(root);

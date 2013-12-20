@@ -27,7 +27,7 @@ import com.intellij.openapi.vcs.update.UpdateSessionAdapter;
 import com.intellij.openapi.vcs.update.UpdatedFiles;
 import com.intellij.openapi.vfs.VirtualFile;
 import bazaar4idea.BzrRevisionNumber;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.command.BzrMergeCommand;
 import bazaar4idea.command.BzrWorkingCopyRevisionsCommand;
 import bazaar4idea.data.BzrTagBranch;
@@ -58,7 +58,7 @@ public class BzrIntegrateEnvironment implements UpdateEnvironment {
     final VirtualFile repo = mergeDialog.getRepository();
     Object[] params1 = new Object[] { repo.getPath() };
     progressIndicator.setText(
-        BzrVcsMessages.message("bzr4intellij.progress.integrating", params1)
+        BzrBundle.message("bzr4intellij.progress.integrating", params1)
     );
 
     BzrMergeCommand mergeCommand = new BzrMergeCommand(project, repo);
@@ -103,7 +103,7 @@ public class BzrIntegrateEnvironment implements UpdateEnvironment {
     } else {
       Object[] params = new Object[] { };
       //noinspection ThrowableInstanceNeverThrown
-      exceptions.add(new VcsException(BzrVcsMessages.message("bzr4intellij.error.invalidTarget", params)));
+      exceptions.add(new VcsException(BzrBundle.message("bzr4intellij.error.invalidTarget", params)));
     }
 
     return new UpdateSessionAdapter(exceptions, false);

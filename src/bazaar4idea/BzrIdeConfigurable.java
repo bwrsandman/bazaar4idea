@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -33,7 +34,7 @@ public class BzrIdeConfigurable implements ApplicationComponent, Configurable {
 
   @Nls
   public String getDisplayName() {
-    return BzrVcsMessages.message("bzr4intellij.bazaar");
+    return BzrBundle.message("bzr4intellij.bazaar");
   }
 
   public Icon getIcon() {

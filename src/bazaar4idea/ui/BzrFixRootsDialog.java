@@ -16,12 +16,12 @@
 
 package bazaar4idea.ui;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vcs.FileStatus;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import bazaar4idea.BzrVcsMessages;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -52,8 +52,8 @@ class BzrFixRootsDialog extends DialogWrapper {
   protected BzrFixRootsDialog(
       Project project, HashSet<String> current, HashSet<String> added, HashSet<String> removed) {
     super(project, true);
-    setTitle(BzrVcsMessages.message("fix.roots.title"));
-    setOKButtonText(BzrVcsMessages.message("fix.roots.button"));
+    setTitle(BzrBundle.message("fix.roots.title"));
+    setOKButtonText(BzrBundle.message("fix.roots.button"));
     TreeSet<Item> items = new TreeSet<Item>();
     for (String f : added) {
       items.add(new Item(f, FileStatus.ADDED));

@@ -23,7 +23,7 @@ import com.intellij.openapi.vcs.rollback.RollbackProgressListener;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.command.BzrRevertCommand;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +40,7 @@ public class BzrRollbackEnvironment implements RollbackEnvironment {
 
   public String getRollbackOperationName() {
     Object[] params = new Object[] { };
-    return BzrVcsMessages.message("bzr4intellij.revert", params);
+    return BzrBundle.message("bzr4intellij.revert", params);
   }
 
   public void rollbackChanges(List<Change> changes, List<VcsException> vcsExceptions,

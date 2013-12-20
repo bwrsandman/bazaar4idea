@@ -30,6 +30,9 @@ import java.util.Set;
 public interface Bzr {
 
   @NotNull
+  BzrCommandResult init(@NotNull Project project, @NotNull VirtualFile root, @NotNull BzrLineHandlerListener... listeners);
+
+  @NotNull
   Set<VirtualFile> untrackedFiles(@NotNull Project project, @NotNull VirtualFile root,
                                   @Nullable Collection<VirtualFile> files) throws VcsException;
 

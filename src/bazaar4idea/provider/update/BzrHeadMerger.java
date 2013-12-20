@@ -25,7 +25,7 @@ import org.emergent.bzr4j.core.cli.BzrXmlResult;
 import org.emergent.bzr4j.core.xmloutput.GenericChange;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.command.BzrIdeaExec;
 import bazaar4idea.command.BzrMergeCommand;
 import bazaar4idea.command.ShellCommandService;
@@ -44,7 +44,7 @@ final class BzrHeadMerger {
 
   public void merge(VirtualFile repo, final UpdatedFiles updatedFiles, ProgressIndicator indicator, final VcsRevisionNumber vcsRevNo)
       throws VcsException {
-    indicator.setText2(BzrVcsMessages.message("bzr4intellij.progress.merging"));
+    indicator.setText2(BzrBundle.message("bzr4intellij.progress.merging"));
 
 //    hgMergeCommand.execute();
 

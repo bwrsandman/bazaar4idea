@@ -16,6 +16,9 @@
 
 package bazaar4idea;
 
+import bazaar4idea.config.BzrExecutableValidator;
+import com.intellij.notification.NotificationDisplayType;
+import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
@@ -26,6 +29,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
@@ -37,6 +41,7 @@ import com.intellij.openapi.vcs.VcsKey;
 import com.intellij.openapi.vcs.annotate.AnnotationProvider;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vcs.changes.ChangeProvider;
+import com.intellij.openapi.vcs.changes.ui.ChangesViewContentManager;
 import com.intellij.openapi.vcs.checkin.CheckinEnvironment;
 import com.intellij.openapi.vcs.diff.DiffProvider;
 import com.intellij.openapi.vcs.history.VcsHistoryProvider;
@@ -83,6 +88,10 @@ import java.util.concurrent.ScheduledFuture;
  * @author Patrick Woodworth
  */
 public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposable {
+  public static final NotificationGroup NOTIFICATION_GROUP_ID = NotificationGroup.toolWindowGroup(
+          "Bazaar Messages", ChangesViewContentManager.TOOLWINDOW_ID, true);
+  public static final NotificationGroup IMPORTANT_ERROR_NOTIFICATION = new NotificationGroup(
+          "Bazaar Important Messages", NotificationDisplayType.STICKY_BALLOON, true);
 
   static final Logger LOG = Logger.getInstance(BzrVcs.class.getName());
 
@@ -124,7 +133,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   private Disposable m_activationDisposable;
 
   private BzrVirtualFileListener virtualFileListener;
-
+  private final BzrExecutableValidator myExecutableValidator;
   private final BzrCommitExecutor commitExecutor;
   private final BzrCurrentBranchStatus hgCurrentBranchStatus = new BzrCurrentBranchStatus();
   private final BzrChangesetStatus incomingChangesStatus = new BzrChangesetStatus(BzrVcs.INCOMING_ICON);
@@ -164,7 +173,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     m_mergeProvider = null;
     updateEnvironment = new BzrUpdateEnvironment(project);
     integrateEnvironment = BzrDebug.EXPERIMENTAL_ENABLED ? new BzrIntegrateEnvironment(project) : null;
-
+    myExecutableValidator = new BzrExecutableValidator(myProject, this);
 //        LogUtil.dumpImportantData(new Properties());
   }
 
@@ -467,7 +476,6 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
     m_activationDisposable = null;
   }
 
-
   private static void fixIgnoreList() {
     ApplicationManager.getApplication().runWriteAction(
         new Runnable() {
@@ -492,4 +500,17 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   public static VcsKey getKey() {
     return ourKey;
   }
+  /**
+   * Run task in background using the common queue (per project)
+   * @param task the task to run
+   */
+  public static void runInBackground(Task.Backgroundable task) {
+    task.queue();
+  }
+
+  @NotNull
+  public BzrExecutableValidator getExecutableValidator() {
+    return myExecutableValidator;
+  }
+
 }

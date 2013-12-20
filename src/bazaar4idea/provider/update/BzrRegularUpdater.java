@@ -23,7 +23,7 @@ import org.emergent.bzr4j.core.cli.BzrStandardResult;
 import bazaar4idea.BzrRevisionNumber;
 import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.BzrVcsMessages;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.command.BzrUpdateCommand;
 
 import java.io.File;
@@ -44,7 +44,7 @@ class BzrRegularUpdater implements BzrUpdater {
   }
 
   public void update(UpdatedFiles updatedFiles, ProgressIndicator indicator) throws VcsException {
-    indicator.setText(BzrVcsMessages.message("bzr4intellij.progress.updating", repository.getPath() ));
+    indicator.setText(BzrBundle.message("bzr4intellij.progress.updating", repository.getPath()));
 
 //        BzrShowConfigCommand configCommand = new BzrShowConfigCommand(project);
 //        String defaultPath = configCommand.getDefaultPath(repository);
@@ -143,7 +143,7 @@ class BzrRegularUpdater implements BzrUpdater {
   }
 
   private BzrStandardResult pull(VirtualFile repo, ProgressIndicator indicator) throws VcsException {
-    indicator.setText2(BzrVcsMessages.message("bzr4intellij.progress.pull.with.update"));
+    indicator.setText2(BzrBundle.message("bzr4intellij.progress.pull.with.update"));
 //        BzrPullCommand command = new BzrPullCommand(project, repo);
     BzrUpdateCommand command = new BzrUpdateCommand(project, repo);
 //        command.setSource(new BzrShowConfigCommand(project).getDefaultPath(repo));

@@ -12,6 +12,7 @@
 // limitations under the License.
 package bazaar4idea.ui;
 
+import bazaar4idea.i18n.BzrBundle;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
@@ -26,7 +27,6 @@ import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
 import bazaar4idea.BzrGlobalSettings;
-import bazaar4idea.BzrVcsMessages;
 import bazaar4idea.command.ShellCommandService;
 
 import javax.swing.*;
@@ -66,8 +66,8 @@ public class BzrConfigurationIdePanel implements Disposable {
     m_globalSettings = globalSettings;
     loadSettings();
 
-    String title = BzrVcsMessages.message("bzr4intellij.configuration.title");
-    String description = BzrVcsMessages.message("bzr4intellij.configuration.description");
+    String title = BzrBundle.message("bzr4intellij.configuration.title");
+    String description = BzrBundle.message("bzr4intellij.configuration.description");
 
     pathSelector.addBrowseFolderListener(
         title, description, null,
@@ -149,7 +149,7 @@ public class BzrConfigurationIdePanel implements Disposable {
     String bzrCmd = pathSelector.getText();
     if (!ShellCommandService.isValid(bzrCmd)) {
       pathSelector.getTextField().setForeground(Color.RED);
-      throw new ConfigurationException(BzrVcsMessages.message("bzr4intellij.configuration.executable.error", bzrCmd));
+      throw new ConfigurationException(BzrBundle.message("bzr4intellij.configuration.executable.error", bzrCmd));
     } else {
       pathSelector.getTextField().setForeground(Color.BLACK);
     }
