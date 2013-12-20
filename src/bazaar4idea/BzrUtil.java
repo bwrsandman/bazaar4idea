@@ -15,7 +15,11 @@
  */
 package bazaar4idea;
 
+import bazaar4idea.repo.BzrRepositoryManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.vfs.AbstractVcsVirtualFile;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -23,9 +27,11 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -109,6 +115,62 @@ public class BzrUtil {
     }
   }
 
+  @Nullable
+  public static VirtualFile findBzrDir(@NotNull VirtualFile rootDir) {
+    VirtualFile child = rootDir.findChild(DOT_BZR);
+    if (child == null) {
+      return null;
+    }
+    if (child.isDirectory()) {
+      return child;
+    }
+
+    // this is standard for submodules, although probably it can
+    String content;
+    try {
+      content = readFile(child);
+    }
+    catch (IOException e) {
+      throw new RuntimeException("Couldn't read " + child, e);
+    }
+    String pathToDir;
+    String prefix = "bzrdir:";
+    if (content.startsWith(prefix)) {
+      pathToDir = content.substring(prefix.length()).trim();
+    }
+    else {
+      pathToDir = content;
+    }
+
+    if (!FileUtil.isAbsolute(pathToDir)) {
+      String canonicalPath = FileUtil.toCanonicalPath(FileUtil.join(rootDir.getPath(), pathToDir));
+      if (canonicalPath == null) {
+        return null;
+      }
+      pathToDir = FileUtil.toSystemIndependentName(canonicalPath);
+    }
+    return VcsUtil.getVirtualFileWithRefresh(new File(pathToDir));
+  }
+
+  /**
+   * Makes 3 attempts to get the contents of the file. If all 3 fail with an IOException, rethrows the exception.
+   */
+  @NotNull
+  public static String readFile(@NotNull VirtualFile file) throws IOException {
+    final int ATTEMPTS = 3;
+    for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
+      try {
+        return new String(file.contentsToByteArray());
+      }
+      catch (IOException e) {
+        LOG.info(String.format("IOException while reading %s (attempt #%s)", file, attempt));
+        if (attempt >= ATTEMPTS - 1) {
+          throw e;
+        }
+      }
+    }
+    throw new AssertionError("Shouldn't get here. Couldn't read " + file);
+  }
   /**
    * Get relative path
    *
@@ -332,4 +394,10 @@ public class BzrUtil {
 //      return m;
 //    }
   }
+
+  @NotNull
+  public static BzrRepositoryManager getRepositoryManager(@NotNull Project project) {
+    return ServiceManager.getService(project, BzrRepositoryManager.class);
+  }
+
 }

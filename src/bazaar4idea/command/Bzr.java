@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 JetBrains s.r.o.
+ * Copyright 2000-2012 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package bazaar4idea.repo;
+package bazaar4idea.command;
 
-import com.intellij.dvcs.repo.Repository;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface BzrRepository extends Repository {
+import java.util.Collection;
+import java.util.Set;
+
+/**
+ * @author Kirill Likhodedov
+ */
+public interface Bzr {
 
   @NotNull
-  VirtualFile getBzrDir();
-
-  @NotNull
-  BzrUntrackedFilesHolder getUntrackedFilesHolder();
+  Set<VirtualFile> untrackedFiles(@NotNull Project project, @NotNull VirtualFile root,
+                                  @Nullable Collection<VirtualFile> files) throws VcsException;
 
 }

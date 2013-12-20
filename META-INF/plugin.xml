@@ -175,7 +175,7 @@
     <!--<vcsCheckinHandlerFactory implementation="bazaar4idea.checkin.BazaarCheckinHandlerFactory"/>-->
     <!--<checkinHandlerFactory implementation="bazaar4idea.checkin.UnresolvedMergeCheckFactory"/>-->
     <!--<logProvider implementation="bazaar4idea.log.BazaarLogProvider"/>-->
-    <!--<vcsChangesViewRefresher implementation="bazaar4idea.changes.BazaarChangesViewRefresher" />-->
+    <vcsChangesViewRefresher implementation="bazaar4idea.changes.BzrChangesViewRefresher" />
 
     <vcs.rootFinder implementation="bazaar4idea.roots.BzrRootFinder"/>
     <!--

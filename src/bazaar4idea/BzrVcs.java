@@ -88,8 +88,6 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 
   public static final String VCS_NAME = "Bazaar";
 
-  public static final String VCS_METADATA_DIR = ".bzr";
-
   private final static VcsKey ourKey = createKey(VCS_NAME);
 
   public static final Topic<BzrUpdater> BRANCH_TOPIC = new Topic<BzrUpdater>("bzr4intellij.branch", BzrUpdater.class);
@@ -475,12 +473,12 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
         new Runnable() {
           public void run() {
             FileTypeManager fileTypeMgr = FileTypeManager.getInstance();
-            if (!fileTypeMgr.isFileIgnored(VCS_METADATA_DIR)) {
+            if (!fileTypeMgr.isFileIgnored(BzrUtil.DOT_BZR)) {
               String ignoredList = fileTypeMgr.getIgnoredFilesList();
               StringBuffer newList = new StringBuffer(ignoredList);
               if (!ignoredList.endsWith(";"))
                 newList.append(';');
-              newList.append(VCS_METADATA_DIR);
+              newList.append(BzrUtil.DOT_BZR);
               fileTypeMgr.setIgnoredFilesList(newList.toString());
             }
           }

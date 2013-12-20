@@ -21,13 +21,9 @@ import com.intellij.dvcs.repo.RepositoryImpl;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.Collection;
 
 /**
  * @author Kirill Likhodedov
@@ -35,11 +31,30 @@ import java.util.Collection;
 public class BzrRepositoryImpl extends RepositoryImpl implements BzrRepository, Disposable {
 
   @NotNull private final BzrPlatformFacade myPlatformFacade;
+//  @NotNull private final BzrRepositoryReader myReader;
+  @NotNull private final VirtualFile myBzrDir;
+  @Nullable private final BzrUntrackedFilesHolder myUntrackedFilesHolder;
 
   protected BzrRepositoryImpl(@NotNull VirtualFile rootDir, @NotNull BzrPlatformFacade facade, @NotNull Project project,
                               @NotNull Disposable parentDisposable, final boolean light) {
     super(project, rootDir, parentDisposable);
     myPlatformFacade = facade;
+    myBzrDir = BzrUtil.findBzrDir(rootDir);
+    assert myBzrDir != null : ".bzr directory wasn't found under " + rootDir.getPresentableUrl();
+//    myReader = new BzrRepositoryReader(VfsUtilCore.virtualToIoFile(myBzrDir));
+    if (!light) {
+      myUntrackedFilesHolder = new BzrUntrackedFilesHolder(this);
+      Disposer.register(this, myUntrackedFilesHolder);
+    }
+    else {
+      myUntrackedFilesHolder = null;
+    }
+  }
+
+  @NotNull
+  @Override
+  public VirtualFile getBzrDir() {
+    return myBzrDir;
   }
 
   /**
@@ -64,7 +79,16 @@ public class BzrRepositoryImpl extends RepositoryImpl implements BzrRepository, 
 
   @Override
   public String toLogString() {
-    return String.format("GitRepository " + getRoot() + " : TODO");
+    return String.format("BzrRepository " + getRoot() + " : TODO");
+  }
+
+  @Override
+  @NotNull
+  public BzrUntrackedFilesHolder getUntrackedFilesHolder() {
+    if (myUntrackedFilesHolder == null) {
+      throw new IllegalStateException("Using untracked files holder with light bzr repository instance " + this);
+    }
+    return myUntrackedFilesHolder;
   }
 
 }
