@@ -177,7 +177,7 @@
     <!--<logProvider implementation="bazaar4idea.log.BazaarLogProvider"/>-->
     <!--<vcsChangesViewRefresher implementation="bazaar4idea.changes.BazaarChangesViewRefresher" />-->
 
-    <!--<vcs.rootFinder implementation="bazaar4idea.roots.BazaarRootFinder"/>-->
+    <vcs.rootFinder implementation="bazaar4idea.roots.BzrRootFinder"/>
     <!--
     <projectService
       serviceInterface="git4idea.history.wholeTree.LogFactoryService"
