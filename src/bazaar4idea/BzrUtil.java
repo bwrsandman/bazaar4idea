@@ -33,7 +33,7 @@ import java.util.WeakHashMap;
  * @author Patrick Woodworth
  */
 public class BzrUtil {
-
+  public static final String DOT_BZR = ".bzr";
   private static final Logger LOG = Logger.getInstance(BzrUtil.class.getName());
 
   private static final Map<String,File> sm_rootFileCache = new WeakHashMap<String, File>();
