@@ -21,6 +21,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vcs.FilePath;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.vfs.AbstractVcsVirtualFile;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -32,8 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * @author Patrick Woodworth
@@ -403,6 +403,96 @@ public class BzrUtil {
    */
   public static boolean isUnderBzr(final VirtualFile vFile) {
     return bzrRootOrNull(vFile) != null;
+  }
+
+  /**
+   * Sort files by Git root
+   *
+   * @param virtualFiles files to sort
+   * @param ignoreNonBzr if true, non-Bazaar files are ignored
+   * @return sorted files
+   * @throws VcsException if non Bazaar files are passed when {@code ignoreNonBzr} is false
+   */
+  public static Map<VirtualFile, List<VirtualFile>> sortFilesByBzrRoot(Collection<VirtualFile> virtualFiles, boolean ignoreNonBzr)
+          throws VcsException {
+    Map<VirtualFile, List<VirtualFile>> result = new HashMap<VirtualFile, List<VirtualFile>>();
+    for (VirtualFile file : virtualFiles) {
+      final VirtualFile vcsRoot = bzrRootOrNull(file);
+      if (vcsRoot == null) {
+        if (ignoreNonBzr) {
+          continue;
+        }
+        else {
+          throw new VcsException("The file " + file.getPath() + " is not under Bazaar");
+        }
+      }
+      List<VirtualFile> files = result.get(vcsRoot);
+      if (files == null) {
+        files = new ArrayList<VirtualFile>();
+        result.put(vcsRoot, files);
+      }
+      files.add(file);
+    }
+    return result;
+  }
+
+  /**
+   * Sort files by vcs root
+   *
+   * @param files files to sort.
+   * @return the map from root to the files under the root
+   * @throws VcsException if non Bazaar files are passed
+   */
+  public static Map<VirtualFile, List<FilePath>> sortFilePathsByBzrRoot(final Collection<FilePath> files) throws VcsException {
+    return sortFilePathsByBzrRoot(files, false);
+  }
+
+  /**
+   * Sort files by vcs root
+   *
+   * @param files files to sort.
+   * @return the map from root to the files under the root
+   */
+  public static Map<VirtualFile, List<FilePath>> sortGitFilePathsByBzrRoot(Collection<FilePath> files) {
+    try {
+      return sortFilePathsByBzrRoot(files, true);
+    }
+    catch (VcsException e) {
+      throw new RuntimeException("Unexpected exception:", e);
+    }
+  }
+
+
+  /**
+   * Sort files by vcs root
+   *
+   * @param files        files to sort.
+   * @param ignoreNonBzr if true, non-Bazaar files are ignored
+   * @return the map from root to the files under the root
+   * @throws VcsException if non Bazaar files are passed when {@code ignoreNonBzr} is false
+   */
+  @NotNull
+  public static Map<VirtualFile, List<FilePath>> sortFilePathsByBzrRoot(@NotNull Collection<FilePath> files, boolean ignoreNonBzr)
+          throws VcsException {
+    Map<VirtualFile, List<FilePath>> rc = new HashMap<VirtualFile, List<FilePath>>();
+    for (FilePath p : files) {
+      VirtualFile root = getBzrRootOrNull(p);
+      if (root == null) {
+        if (ignoreNonBzr) {
+          continue;
+        }
+        else {
+          throw new VcsException("The file " + p.getPath() + " is not under Bazaar");
+        }
+      }
+      List<FilePath> l = rc.get(root);
+      if (l == null) {
+        l = new ArrayList<FilePath>();
+        rc.put(root, l);
+      }
+      l.add(p);
+    }
+    return rc;
   }
 
 }

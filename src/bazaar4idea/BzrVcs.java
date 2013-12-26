@@ -17,9 +17,12 @@
 package bazaar4idea;
 
 import bazaar4idea.command.Bzr;
+import bazaar4idea.config.BzrExecutableDetector;
 import bazaar4idea.config.BzrExecutableValidator;
 import bazaar4idea.config.BzrVcsApplicationSettings;
 import bazaar4idea.config.BzrVcsSettings;
+import bazaar4idea.history.NewBzrUsersComponent;
+import bazaar4idea.vfs.BzrVFSListener;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
@@ -30,14 +33,10 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.diff.impl.patch.formove.FilePathComparator;
 import com.intellij.openapi.editor.markup.TextAttributes;
-import com.intellij.openapi.fileEditor.FileEditorManagerAdapter;
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vcs.AbstractVcs;
@@ -62,10 +61,8 @@ import com.intellij.openapi.wm.WindowManager;
 import com.intellij.util.EventDispatcher;
 import com.intellij.util.containers.ComparatorDelegate;
 import com.intellij.util.containers.Convertor;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.messages.Topic;
-import com.intellij.util.ui.UIUtil;
 import bazaar4idea.provider.BzrChangeProvider;
 import bazaar4idea.provider.BzrDiffProvider;
 import bazaar4idea.provider.BzrHistoryProvider;
@@ -83,6 +80,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -162,6 +160,8 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   private EventDispatcher<BzrRootsListener> myRootListeners = EventDispatcher.create(BzrRootsListener.class);
 
   private boolean started;
+
+  private BzrVFSListener myVFSListener; // a VFS listener that tracks file addition, deletion, and renaming.
 
   public static BzrVcs getInstance(@NotNull Project project) {
     return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(NAME);
@@ -407,85 +407,44 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   }
 
   public void activate() {
-    if (!started) {
-      return;
+    checkExecutableAndVersion();
+
+    if (myVFSListener == null) {
+      myVFSListener = new BzrVFSListener(myProject, this, myBzr);
     }
+    NewBzrUsersComponent.getInstance(myProject).activate();
+    // TODO
+//    if (!Registry.is("bzr.new.log")) {
+//      BzrProjectLogManager.getInstance(myProject).activate();
+//    }
 
-    LocalFileSystem lfs = LocalFileSystem.getInstance();
-    lfs.addVirtualFileListener(myVirtualFileListener);
-    lfs.registerAuxiliaryFileOperationsHandler(myVirtualFileListener);
-    CommandProcessor.getInstance().addCommandListener(myVirtualFileListener);
+    // TODO
+//    if (!ApplicationManager.getApplication().isHeadlessEnvironment()) {
+//      myBranchWidget = new BzrBranchWidget(myProject);
+//      DvcsUtil.installStatusBarWidget(myProject, myBranchWidget);
+//    }
+//    if (myRepositoryForAnnotationsListener == null) {
+//      myRepositoryForAnnotationsListener = new BzrRepositoryForAnnotationsListener(myProject);
+//    }
+//    ((BzrCommitsSequentialIndex) ServiceManager.getService(BzrCommitsSequentially.class)).activate();
+  }
 
-    BzrGlobalSettings globalSettings = BzrGlobalSettings.getInstance();
-    BzrProjectSettings projectSettings = BzrProjectSettings.getInstance(myProject);
-
-//    ChangeListManager.getInstance(myProject).registerCommitExecutor(myCommitExecutor);
-
-    StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
-    if (statusBar != null) {
-      statusBar.addCustomIndicationComponent(hgCurrentBranchStatus);
-      statusBar.addCustomIndicationComponent(incomingChangesStatus);
-      statusBar.addCustomIndicationComponent(outgoingChangesStatus);
-    }
-
-    final BzrIncomingStatusUpdater incomingUpdater =
-        new BzrIncomingStatusUpdater(incomingChangesStatus, projectSettings);
-
-    final BzrOutgoingStatusUpdater outgoingUpdater =
-        new BzrOutgoingStatusUpdater(outgoingChangesStatus, projectSettings);
-
-//        changesUpdaterScheduledFuture = JobScheduler.getScheduler().scheduleWithFixedDelay(
-//                new Runnable() {
-//                    public void run() {
-//                        incomingUpdater.update(myProject);
-//                        outgoingUpdater.update(myProject);
-//                    }
-//                }, 0, globalSettings.getIncomingCheckIntervalSeconds(), TimeUnit.SECONDS);
-
-    MessageBus messageBus = myProject.getMessageBus();
-    messageBusConnection = messageBus.connect();
-
-    messageBusConnection.subscribe(BzrVcs.INCOMING_TOPIC, incomingUpdater);
-    messageBusConnection.subscribe(BzrVcs.OUTGOING_TOPIC, outgoingUpdater);
-
-    messageBusConnection.subscribe(
-        BzrVcs.BRANCH_TOPIC, new BzrCurrentBranchStatusUpdater(hgCurrentBranchStatus)
-    );
-
-    messageBusConnection.subscribe(
-        FileEditorManagerListener.FILE_EDITOR_MANAGER,
-        new FileEditorManagerAdapter() {
-          @Override
-          public void selectionChanged(FileEditorManagerEvent event) {
-            Project project = event.getManager().getProject();
-            project.getMessageBus()
-                .asyncPublisher(BzrVcs.BRANCH_TOPIC)
-                .update(project);
-          }
-        }
-    );
-
-    if (BzrDebug.ROOT_REMAPPING_ENABLED && !myProject.isDefault() && myRootTracker == null) {
-      myRootTracker = new BzrRootTracker(this, myProject, myRootListeners.getMulticaster());
-    }
-
-    final BzrConfigurationValidator configValidator = new BzrConfigurationValidator(myProject);
-
-    StartupManager.getInstance(myProject).runWhenProjectIsInitialized(new Runnable() {
-      public void run() {
-        UIUtil.invokeLaterIfNeeded(new Runnable() {
-          public void run() {
-            fixIgnoreList();
-            configValidator.check();
-          }
-        });
+  private void checkExecutableAndVersion() {
+    boolean executableIsAlreadyCheckedAndFine = false;
+    String pathToGit = myAppSettings.getPathToBzr();
+    if (!pathToGit.contains(File.separator)) { // no path, just sole executable, with a hope that it is in path
+      // subject to re-detect the path if executable validator fails
+      if (!myExecutableValidator.isExecutableValid()) {
+        myAppSettings.setPathToBzr(new BzrExecutableDetector().detect());
       }
-    });
-
-    m_activationDisposable = new Disposable() {
-      public void dispose() {
+      else {
+        executableIsAlreadyCheckedAndFine = true; // not to check it twice
       }
-    };
+    }
+//    TODO
+//    if (executableIsAlreadyCheckedAndFine || myExecutableValidator.checkExecutableAndNotifyIfNeeded()) {
+//      checkVersion();
+//    }
   }
 
   public void deactivate() {
