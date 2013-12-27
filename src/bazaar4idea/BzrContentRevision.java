@@ -82,6 +82,31 @@ public class BzrContentRevision implements ContentRevision {
     return createRevision(file, revisionNumber, project);
   }
 
+  public static ContentRevision createRevision(@NotNull final VirtualFile file,
+                                               @Nullable final VcsRevisionNumber revisionNumber,
+                                               @NotNull final Project project) {
+    return createRevision(file, revisionNumber, project, null);
+  }
+
+  public static ContentRevision createRevision(@NotNull final VirtualFile file,
+                                               @Nullable final VcsRevisionNumber revisionNumber,
+                                               @NotNull final Project project, @Nullable final Charset charset) {
+    final FilePathImpl filePath = new FilePathImpl(file);
+    return createRevision(filePath, revisionNumber, project, charset);
+  }
+
+  public static ContentRevision createRevision(@NotNull final FilePath filePath,
+                                               @Nullable final VcsRevisionNumber revisionNumber,
+                                               @NotNull final Project project, @Nullable final Charset charset) {
+    if (revisionNumber != null && revisionNumber != VcsRevisionNumber.NULL) {
+      return createRevisionImpl(filePath, (BzrRevisionNumber)revisionNumber, project, charset);
+    }
+    else {
+      return CurrentContentRevision.create(filePath);
+    }
+  }
+
+
   private static ContentRevision createRevision(@NotNull FilePath filePath,
                                                 @Nullable VcsRevisionNumber revisionNumber,
                                                 @NotNull Project project) {
