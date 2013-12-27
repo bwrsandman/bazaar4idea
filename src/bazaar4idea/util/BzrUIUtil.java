@@ -15,8 +15,10 @@
  */
 package bazaar4idea.util;
 
+import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
 import bazaar4idea.i18n.BzrBundle;
+import bazaar4idea.repo.BzrRepository;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
@@ -348,6 +350,47 @@ public class BzrUIUtil {
   
   private static String surround(String s, String tag) {
     return String.format("<%2$s>%1$s</%2$s>", s, tag);
+  }
+
+  /**
+   * Setup root chooser with specified elements and link selection to the current branch label.
+   *
+   * @param project            a context project
+   * @param roots              Bazaar roots for the project
+   * @param defaultRoot        a default root
+   * @param bzrRootChooser     Bazaar root selector
+   * @param currentBranchLabel current branch label (might be null)
+   */
+  public static void setupRootChooser(@NotNull final Project project,
+                                      @NotNull final List<VirtualFile> roots,
+                                      @Nullable final VirtualFile defaultRoot,
+                                      @NotNull final JComboBox bzrRootChooser,
+                                      @Nullable final JLabel currentBranchLabel) {
+    for (VirtualFile root : roots) {
+      bzrRootChooser.addItem(root);
+    }
+    bzrRootChooser.setRenderer(getVirtualFileListCellRenderer());
+    bzrRootChooser.setSelectedItem(defaultRoot != null ? defaultRoot : roots.get(0));
+    if (currentBranchLabel != null) {
+      final ActionListener listener = new ActionListener() {
+        public void actionPerformed(final ActionEvent e) {
+          VirtualFile root = (VirtualFile)bzrRootChooser.getSelectedItem();
+          assert root != null : "The root must not be null";
+          BzrRepository repo = BzrUtil.getRepositoryManager(project).getRepositoryForRoot(root);
+          assert repo != null : "The repository must not be null";
+          // TODO
+//          BzrBranch current = repo.getCurrentBranch();
+//          if (current == null) {
+            currentBranchLabel.setText(NO_CURRENT_BRANCH);
+//          }
+//          else {
+//            currentBranchLabel.setText(current.getName());
+//          }
+        }
+      };
+      listener.actionPerformed(null);
+      bzrRootChooser.addActionListener(listener);
+    }
   }
 
 }

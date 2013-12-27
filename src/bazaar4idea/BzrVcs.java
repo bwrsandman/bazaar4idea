@@ -22,6 +22,7 @@ import bazaar4idea.config.BzrExecutableValidator;
 import bazaar4idea.config.BzrVcsApplicationSettings;
 import bazaar4idea.config.BzrVcsSettings;
 import bazaar4idea.history.NewBzrUsersComponent;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.vfs.BzrVFSListener;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.notification.NotificationDisplayType;
@@ -37,6 +38,7 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vcs.AbstractVcs;
@@ -72,6 +74,7 @@ import bazaar4idea.provider.commit.BzrCheckinEnvironment;
 import bazaar4idea.provider.update.BzrUpdateEnvironment;
 import bazaar4idea.ui.BzrChangesetStatus;
 import bazaar4idea.ui.BzrCurrentBranchStatus;
+import com.intellij.util.ui.UIUtil;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
 import bazaar4idea.ui.BzrRootTracker;
 import bazaar4idea.util.BzrDebug;
@@ -161,31 +164,11 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 
   private boolean started;
 
+  private final @NotNull BzrPlatformFacade myPlatformFacade;
   private BzrVFSListener myVFSListener; // a VFS listener that tracks file addition, deletion, and renaming.
 
   public static BzrVcs getInstance(@NotNull Project project) {
     return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(NAME);
-  }
-
-  public BzrVcs(@NotNull final Project project) {
-    super(project, NAME);
-
-//    myConfigurable = new BzrProjectConfigurable(project);
-    myChangeProvider = new BzrChangeProvider(project, getKeyInstanceMethod());
-    myVirtualFileListener = new BzrVirtualFileListener(project, this);
-    myRollbackEnvironment = new BzrRollbackEnvironment(project);
-    myDiffProvider = new BzrDiffProvider(project);
-    myHistoryProvider = new BzrHistoryProvider(project);
-    myCheckinEnvironment = new BzrCheckinEnvironment(project);
-    myAnnotationProvider = new BzrAnnotationProvider(project);
-//    myCommitExecutor = new BzrCommitExecutor(project);
-
-    myUpdateEnvironment = new BzrUpdateEnvironment(project, this, null);
-//    myIntegrateEnvironment = BzrDebug.EXPERIMENTAL_ENABLED ? new BzrIntegrateEnvironment(project) : null;
-    myExecutableValidator = new BzrExecutableValidator(myProject, this);
-    myVcsManager = null;
-    myBzr = null;
-//        LogUtil.dumpImportantData(new Properties());
   }
 
   public BzrVcs(@NotNull Project project,
@@ -215,7 +198,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 //    myTreeDiffProvider = new BzrTreeDiffProvider(myProject);
 //    myCommitAndPushExecutor = new BzrCommitAndPushExecutor(myCheckinEnvironment);
     myExecutableValidator = new BzrExecutableValidator(myProject, this);
-//    myPlatformFacade = ServiceManager.getService(myProject, BzrPlatformFacade.class);
+    myPlatformFacade = ServiceManager.getService(myProject, BzrPlatformFacade.class);
   }
 
   public ReadWriteLock getCommandLock() {
@@ -431,8 +414,8 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
 
   private void checkExecutableAndVersion() {
     boolean executableIsAlreadyCheckedAndFine = false;
-    String pathToGit = myAppSettings.getPathToBzr();
-    if (!pathToGit.contains(File.separator)) { // no path, just sole executable, with a hope that it is in path
+    String pathToBzr = myAppSettings.getPathToBzr();
+    if (!pathToBzr.contains(File.separator)) { // no path, just sole executable, with a hope that it is in path
       // subject to re-detect the path if executable validator fails
       if (!myExecutableValidator.isExecutableValid()) {
         myAppSettings.setPathToBzr(new BzrExecutableDetector().detect());
@@ -523,6 +506,31 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   public void showMessages(@NotNull String message) {
     if (message.length() == 0) return;
     showMessage(message, ConsoleViewContentType.NORMAL_OUTPUT.getAttributes());
+  }
+
+  /**
+   * Show errors as popup and as messages in vcs view.
+   *
+   * @param list   a list of errors
+   * @param action an action
+   */
+  public void showErrors(@NotNull List<VcsException> list, @NotNull String action) {
+    if (list.size() > 0) {
+      StringBuilder buffer = new StringBuilder();
+      buffer.append("\n");
+      buffer.append(BzrBundle.message("error.list.title", action));
+      for (final VcsException exception : list) {
+        buffer.append("\n");
+        buffer.append(exception.getMessage());
+      }
+      final String msg = buffer.toString();
+      UIUtil.invokeLaterIfNeeded(new Runnable() {
+        @Override
+        public void run() {
+          Messages.showErrorDialog(myProject, msg, BzrBundle.getString("error.dialog.title"));
+        }
+      });
+    }
   }
 
   /**

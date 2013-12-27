@@ -12,53 +12,144 @@
 // limitations under the License.
 package bazaar4idea.ui;
 
+import bazaar4idea.BzrUtil;
+import bazaar4idea.command.BzrCommand;
+import bazaar4idea.command.BzrHandlerUtil;
+import bazaar4idea.command.BzrSimpleHandler;
+import bazaar4idea.i18n.BzrBundle;
+import bazaar4idea.repo.BzrRepositoryManager;
+import bazaar4idea.util.BzrUIUtil;
+import bazaar4idea.util.StringScanner;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NonNls;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BzrTagDialog extends DialogWrapper {
 
-  private JPanel contentPanel;
+  private JPanel myPanel;
 
-  private JTextField tagTxt;
+  /**
+   * Bazaar root selector
+   */
+  private JComboBox myBzrRootComboBox;
+  /**
+   * Current branch label
+   */
+  private JLabel myCurrentBranch;
+  /**
+   * Tag name
+   */
+  private JTextField myTagNameTextField;
+  /**
+   * Force tag creation checkbox
+   */
+  private JCheckBox myForceCheckBox;
+  /**
+   * Text area that contains tag message if non-empty
+   */
+  private JTextArea myMessageTextArea;
+  /**
+   * The name of commit to tag
+   */
+  private JTextField myCommitTextField;
+  /**
+   * The validate button
+   */
+  private JButton myValidateButton;
+  /**
+   * The validator for commit text field
+   */
+  private final BzrReferenceValidator myCommitTextFieldValidator;
+
 
   private BzrRepositorySelectorComponent hgRepositorySelectorComponent;
 
-  public BzrTagDialog(Project project) {
+  /**
+   * The current project
+   */
+  private final Project myProject;
+  /**
+   * Existing tags for the project
+   */
+  private final Set<String> myExistingTags = new HashSet<String>();
+
+  /**
+   * Prefix for message file name
+   */
+  @NonNls private static final String MESSAGE_FILE_PREFIX = "bzr-tag-message-";
+  /**
+   * Suffix for message file name
+   */
+  @NonNls private static final String MESSAGE_FILE_SUFFIX = ".txt";
+  /**
+   * Encoding for the message file
+   */
+  @NonNls private static final String MESSAGE_FILE_ENCODING = "UTF-8";
+
+
+  /**
+   * A constructor
+   *
+   * @param project     a project to select
+   * @param roots       a Bazaar repository roots for the project
+   * @param defaultRoot a guessed default root
+   */
+  public BzrTagDialog(Project project, List<VirtualFile> roots, VirtualFile defaultRoot) {
     super(project, false);
-    hgRepositorySelectorComponent.setTitle("Select repository to tag");
-    DocumentListener documentListener = new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        update();
+    setTitle(BzrBundle.getString("tag.title"));
+    setOKButtonText(BzrBundle.getString("tag.button"));
+    myProject = project;
+    BzrUIUtil.setupRootChooser(myProject, roots, defaultRoot, myBzrRootComboBox, myCurrentBranch);
+    myBzrRootComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(final ActionEvent e) {
+        fetchTags();
+        validateFields();
       }
-
-      public void removeUpdate(DocumentEvent e) {
-        update();
+    });
+    fetchTags();
+    myTagNameTextField.getDocument().addDocumentListener(new DocumentAdapter() {
+      protected void textChanged(final DocumentEvent e) {
+        validateFields();
       }
-
-      public void changedUpdate(DocumentEvent e) {
-        update();
+    });
+    myCommitTextFieldValidator = new BzrReferenceValidator(project, myBzrRootComboBox, myCommitTextField, myValidateButton, new Runnable() {
+      public void run() {
+        validateFields();
       }
-    };
-
-    tagTxt.getDocument().addDocumentListener(documentListener);
-
-    setTitle("Tag");
+    });
+    myForceCheckBox.addActionListener(new ActionListener() {
+      public void actionPerformed(final ActionEvent e) {
+        if (myForceCheckBox.isEnabled()) {
+          validateFields();
+        }
+      }
+    });
     init();
+    validateFields();
   }
 
   public String getTagName() {
-    return tagTxt.getText();
+    return myTagNameTextField.getText();
   }
 
   public VirtualFile getRepository() {
@@ -71,7 +162,7 @@ public class BzrTagDialog extends DialogWrapper {
   }
 
   protected JComponent createCenterPanel() {
-    return contentPanel;
+    return myPanel;
   }
 
   private void update() {
@@ -79,7 +170,127 @@ public class BzrTagDialog extends DialogWrapper {
   }
 
   private boolean validateOptions() {
-    return StringUtils.isNotBlank(tagTxt.getText());
+    return StringUtils.isNotBlank(myTagNameTextField.getText());
+  }
+
+  /**
+   * Validate dialog fields
+   */
+  private void validateFields() {
+    String text = myTagNameTextField.getText();
+    if (myExistingTags.contains(text)) {
+      myForceCheckBox.setEnabled(true);
+      if (!myForceCheckBox.isSelected()) {
+        setErrorText(BzrBundle.getString("tag.error.tag.exists"));
+        setOKActionEnabled(false);
+        return;
+      }
+    }
+    else {
+      myForceCheckBox.setEnabled(false);
+      myForceCheckBox.setSelected(false);
+    }
+    if (myCommitTextFieldValidator.isInvalid()) {
+      setErrorText(BzrBundle.getString("tag.error.invalid.commit"));
+      setOKActionEnabled(false);
+      return;
+    }
+    if (text.length() == 0) {
+      setErrorText(null);
+      setOKActionEnabled(false);
+      return;
+    }
+    setErrorText(null);
+    setOKActionEnabled(true);
+  }
+
+  /**
+   * Fetch tags
+   */
+  private void fetchTags() {
+    myExistingTags.clear();
+    BzrSimpleHandler h = new BzrSimpleHandler(myProject, getBzrRoot(), BzrCommand.TAG);
+    h.setSilent(true);
+    String output = BzrHandlerUtil.doSynchronously(h, BzrBundle.getString("tag.getting.existing.tags"), h.printableCommandLine());
+    for (StringScanner s = new StringScanner(output); s.hasMoreData();) {
+      String line = s.line();
+      if (line.length() == 0) {
+        continue;
+      }
+      myExistingTags.add(line);
+    }
+  }
+
+  /**
+   * @return the current Bazaar root
+   */
+  private VirtualFile getBzrRoot() {
+    return (VirtualFile)myBzrRootComboBox.getSelectedItem();
+  }
+
+  /**
+   * Perform tagging according to selected options
+   *
+   * @param exceptions the list where exceptions are collected
+   */
+  public void runAction(final List<VcsException> exceptions) {
+    final String message = myMessageTextArea.getText();
+    final boolean hasMessage = message.trim().length() != 0;
+    final File messageFile;
+    if (hasMessage) {
+      try {
+        messageFile = FileUtil.createTempFile(MESSAGE_FILE_PREFIX, MESSAGE_FILE_SUFFIX);
+        messageFile.deleteOnExit();
+        Writer out = new OutputStreamWriter(new FileOutputStream(messageFile), MESSAGE_FILE_ENCODING);
+        try {
+          out.write(message);
+        }
+        finally {
+          out.close();
+        }
+      }
+      catch (IOException ex) {
+        Messages.showErrorDialog(myProject, BzrBundle.message("tag.error.creating.message.file.message", ex.toString()),
+                BzrBundle.getString("tag.error.creating.message.file.title"));
+        return;
+      }
+    }
+    else {
+      messageFile = null;
+    }
+    try {
+      // TODO verify invocation in Bazaar vs. git
+      BzrSimpleHandler h = new BzrSimpleHandler(myProject, getBzrRoot(), BzrCommand.TAG);
+      if (hasMessage) {
+        h.addParameters("-a");
+      }
+      if (myForceCheckBox.isEnabled() && myForceCheckBox.isSelected()) {
+        h.addParameters("-f");
+      }
+      if (hasMessage) {
+        h.addParameters("-F", messageFile.getAbsolutePath());
+      }
+      h.addParameters(myTagNameTextField.getText());
+      String object = myCommitTextField.getText().trim();
+      if (object.length() != 0) {
+        h.addParameters(object);
+      }
+      try {
+        BzrHandlerUtil.doSynchronously(h, BzrBundle.getString("tagging.title"), h.printableCommandLine());
+        BzrUIUtil.notifySuccess(myProject, myTagNameTextField.getText(), "Created tag "  + myTagNameTextField.getText() + " successfully.");
+      }
+      finally {
+        exceptions.addAll(h.errors());
+        BzrRepositoryManager manager = BzrUtil.getRepositoryManager(myProject);
+        manager.updateRepository(getBzrRoot());
+      }
+    }
+    finally {
+      if (messageFile != null) {
+        //noinspection ResultOfMethodCallIgnored
+        messageFile.delete();
+      }
+    }
   }
 
   {
@@ -95,25 +306,25 @@ public class BzrTagDialog extends DialogWrapper {
    * @noinspection ALL
    */
   private void $$$setupUI$$$() {
-    contentPanel = new JPanel();
-    contentPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
+    myPanel = new JPanel();
+    myPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
     final Spacer spacer1 = new Spacer();
-    contentPanel.add(spacer1,
-        new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
-            GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+    myPanel.add(spacer1,
+            new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+                    GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     hgRepositorySelectorComponent = new BzrRepositorySelectorComponent();
-    contentPanel.add(hgRepositorySelectorComponent.$$$getRootComponent$$$(),
-        new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
-            0, false));
+    myPanel.add(hgRepositorySelectorComponent.$$$getRootComponent$$$(),
+            new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                    GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
+                    GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
+                    0, false));
     final JPanel panel1 = new JPanel();
     panel1.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-    contentPanel.add(panel1,
-        new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
-            0, false));
+    myPanel.add(panel1,
+            new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+                    GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                    GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
+                    0, false));
     final JLabel label1 = new JLabel();
     label1.setText("Tag name:");
     panel1.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
@@ -122,8 +333,8 @@ public class BzrTagDialog extends DialogWrapper {
     panel1.add(spacer2,
         new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-    tagTxt = new JTextField();
-    panel1.add(tagTxt,
+    myTagNameTextField = new JTextField();
+    panel1.add(myTagNameTextField,
         new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null,
             new Dimension(150, -1), null, 0, false));
@@ -131,6 +342,6 @@ public class BzrTagDialog extends DialogWrapper {
 
   /** @noinspection ALL */
   public JComponent $$$getRootComponent$$$() {
-    return contentPanel;
+    return myPanel;
   }
 }

@@ -4,9 +4,14 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vcs.FilePath;
+import com.intellij.openapi.vcs.FilePathImpl;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.ContentRevision;
+import com.intellij.openapi.vcs.changes.CurrentContentRevision;
+import com.intellij.openapi.vcs.history.VcsRevisionNumber;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
@@ -15,8 +20,10 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import bazaar4idea.command.BzrCatCommand;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * @author Patrick Woodworth
@@ -25,38 +32,92 @@ public class BzrContentRevision implements ContentRevision {
 
   private static final Logger LOG = Logger.getInstance(BzrContentRevision.class.getName());
 
-  private final Project m_project;
+  @NotNull protected final Project myProject;
 
-  private final FilePath m_filePath;
+  @NotNull protected final FilePath myFile;
 
-  private final BzrRevisionNumber m_revisionNumber;
+  @NotNull protected final BzrRevisionNumber myRevision;
 
-  private String m_content;
+  private String myContent;
+  /**
+   * The charset for the file
+   */
+  @Nullable private Charset myCharset;
 
-  private BzrContentRevision(Project project, FilePath path, BzrRevisionNumber revision) {
-    m_project = project;
-    m_filePath = path;
-    m_revisionNumber = revision;
+
+  protected BzrContentRevision(@NotNull FilePath path, @NotNull BzrRevisionNumber revision,
+                             @NotNull Project project, @Nullable Charset charset) {
+    myProject = project;
+    myFile = path;
+    myRevision = revision;
+    myCharset = charset;
   }
 
-  public static BzrContentRevision createBzrContentRevision(
-      Project project, VirtualFile vcsRoot, VirtualFile file, BzrRevisionNumber revision) {
-    return createBzrContentRevision(project, vcsRoot, VfsUtil.virtualToIoFile(file), revision);
+  /**
+   * Create revision
+   *
+   *
+   * @param vcsRoot        a vcs root for the repository
+   * @param path           an path inside with possibly escape sequences
+   * @param revisionNumber a revision number, if null the current revision will be created
+   * @param project        the context project
+   * @param isDeleted      if true, the file is deleted
+   * @param unescapePath
+   * @return a created revision
+   * @throws VcsException
+   *          if there is a problem with creating revision
+   */
+  public static ContentRevision createRevision(VirtualFile vcsRoot,
+                                               String path,
+                                               @Nullable VcsRevisionNumber revisionNumber,
+                                               Project project,
+                                               boolean isDeleted, final boolean canBeDeleted,
+                                               boolean unescapePath) throws VcsException {
+    final FilePath file;
+    if (project.isDisposed()) {
+      file = new FilePathImpl(new File(makeAbsolutePath(vcsRoot, path, unescapePath)), false);
+    } else {
+      file = createPath(vcsRoot, path, isDeleted, canBeDeleted, unescapePath);
+    }
+    return createRevision(file, revisionNumber, project);
   }
 
-  public static BzrContentRevision createBzrContentRevision(
-      Project project, VirtualFile vcsRoot, final File file, BzrRevisionNumber revision) {
+  private static ContentRevision createRevision(@NotNull FilePath filePath,
+                                                @Nullable VcsRevisionNumber revisionNumber,
+                                                @NotNull Project project) {
+    if (revisionNumber != null && revisionNumber != VcsRevisionNumber.NULL) {
+      return createRevisionImpl(filePath, (BzrRevisionNumber)revisionNumber, project, null);
+    }
+    else {
+      return CurrentContentRevision.create(filePath);
+    }
+  }
+
+
+  public static BzrContentRevision createRevision(Project project,
+                                                  VirtualFile vcsRoot,
+                                                  VirtualFile file,
+                                                  BzrRevisionNumber revision) {
+    return createRevision(project, vcsRoot, VfsUtil.virtualToIoFile(file), revision);
+  }
+
+  public static BzrContentRevision createRevision(Project project,
+                                                  VirtualFile vcsRoot,
+                                                  final File file,
+                                                  BzrRevisionNumber revision) {
     FilePath filePath = getFilePath(file);
-    return new BzrContentRevision(project, filePath, revision);
+    return new BzrContentRevision(filePath, revision, project, null);
   }
 
-  public static BzrContentRevision createBzrContentRevision(
-      Project project, VirtualFile vcsRoot, final FilePath filePath, BzrRevisionNumber revision) {
-    return new BzrContentRevision(project, filePath, revision);
+  public static BzrContentRevision createRevision(Project project,
+                                                  VirtualFile vcsRoot,
+                                                  final FilePath filePath,
+                                                  BzrRevisionNumber revision) {
+    return new BzrContentRevision(filePath, revision, project, null);
   }
 
   public String getContent() throws VcsException {
-    if (StringUtils.isBlank(m_content)) {
+    if (StringUtils.isBlank(myContent)) {
       FilePath fpath = getFile();
       if (fpath.isNonLocal()) {
         LOG.debug("nonLocal: " + fpath);
@@ -64,26 +125,26 @@ public class BzrContentRevision implements ContentRevision {
       if (fpath.isDirectory()) {
         return null;
       }
-      m_content = new BzrCatCommand(m_project).execute(fpath.getIOFile(), m_revisionNumber, fpath.getCharset());
+      myContent = new BzrCatCommand(myProject).execute(fpath.getIOFile(), myRevision, fpath.getCharset());
     }
-    return m_content;
+    return myContent;
   }
 
   @NotNull
   public FilePath getFile() {
-    return m_filePath;
+    return myFile;
   }
 
   @NotNull
   public BzrRevisionNumber getRevisionNumber() {
-    return m_revisionNumber;
+    return myRevision;
   }
 
   @Override
   public int hashCode() {
     return new HashCodeBuilder()
         .append(getFile())
-        .append(m_revisionNumber)
+        .append(myRevision)
         .toHashCode();
   }
 
@@ -98,7 +159,7 @@ public class BzrContentRevision implements ContentRevision {
     BzrContentRevision that = (BzrContentRevision)object;
     return new EqualsBuilder()
         .append(getFile(), that.getFile())
-        .append(m_revisionNumber, that.m_revisionNumber)
+        .append(myRevision, that.myRevision)
         .isEquals();
   }
 
@@ -110,4 +171,48 @@ public class BzrContentRevision implements ContentRevision {
           }
         });
   }
+
+  public static ContentRevision createRevisionForTypeChange(@NotNull Project project,
+                                                            @NotNull VirtualFile vcsRoot,
+                                                            @NotNull String path,
+                                                            @Nullable VcsRevisionNumber revisionNumber,
+                                                            boolean unescapePath) throws VcsException {
+    final FilePath filePath;
+    if (revisionNumber == null) {
+      File file = new File(makeAbsolutePath(vcsRoot, path, unescapePath));
+      VirtualFile virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
+      filePath = virtualFile == null ? new FilePathImpl(file, false) : new FilePathImpl(virtualFile);
+    } else {
+      filePath = createPath(vcsRoot, path, false, false, unescapePath);
+    }
+    return createRevision(filePath, revisionNumber, project);
+  }
+
+  public static FilePath createPath(@NotNull VirtualFile vcsRoot, @NotNull String path,
+                                    boolean isDeleted, boolean canBeDeleted, boolean unescapePath) throws VcsException {
+    final String absolutePath = makeAbsolutePath(vcsRoot, path, unescapePath);
+    FilePath file = isDeleted ? VcsUtil.getFilePathForDeletedFile(absolutePath, false) : VcsUtil.getFilePath(absolutePath, false);
+    if (canBeDeleted && (! SystemInfo.isFileSystemCaseSensitive) && VcsUtil.caseDiffers(file.getPath(), absolutePath)) {
+      // as for deleted file
+      file = FilePathImpl.createForDeletedFile(new File(absolutePath), false);
+    }
+    return file;
+  }
+
+  private static String makeAbsolutePath(@NotNull VirtualFile vcsRoot, @NotNull String path, boolean unescapePath) throws VcsException {
+    final String unescapedPath = /*unescapePath ? GitUtil.unescapePath(path) :*/ path;
+    return vcsRoot.getPath() + "/" + unescapedPath;
+  }
+
+  private static BzrContentRevision createRevisionImpl(@NotNull FilePath path,
+                                                       @NotNull BzrRevisionNumber revisionNumber,
+                                                       @NotNull Project project,
+                                                       @Nullable final Charset charset) {
+    if (path.getFileType().isBinary()) {
+      return new BzrBinaryContentRevision(path, revisionNumber, project);
+    } else {
+      return new BzrContentRevision(path, revisionNumber, project, charset);
+    }
+  }
+
 }

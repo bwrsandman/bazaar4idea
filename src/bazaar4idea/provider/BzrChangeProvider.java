@@ -314,7 +314,7 @@ public class BzrChangeProvider implements ChangeProvider {
 
     private void processModified(BazaarItemKind kind, String path) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
-      BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
+      BzrContentRevision bcr = BzrContentRevision.createRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
       Change change = new Change(bcr, CurrentContentRevision.create(fpath), FileStatus.MODIFIED);
       CHANGES.debug(String.format("%10s \"%s\"", "modified", fpath));
       m_builder.processChange(change, m_vcsKey);
@@ -322,7 +322,7 @@ public class BzrChangeProvider implements ChangeProvider {
 
     private void processRemoved(BazaarItemKind kind, String path) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
-      BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
+      BzrContentRevision bcr = BzrContentRevision.createRevision(m_project, m_vcsRoot, fpath, m_bzrRev);
       Change change = new Change(bcr, null, FileStatus.DELETED);
       CHANGES.debug(String.format("%10s \"%s\"", "removed", fpath));
       m_builder.processChange(change, m_vcsKey);
@@ -331,7 +331,7 @@ public class BzrChangeProvider implements ChangeProvider {
     private void processRenamed(BazaarItemKind kind, String path, String oldPath) {
       FilePath fpath = VcsUtil.getFilePath(new File(getWorkDir(),path));
       FilePath oldfpath = VcsUtil.getFilePath(new File(getWorkDir(),oldPath));
-      BzrContentRevision bcr = BzrContentRevision.createBzrContentRevision(m_project, m_vcsRoot, oldfpath, m_bzrRev);
+      BzrContentRevision bcr = BzrContentRevision.createRevision(m_project, m_vcsRoot, oldfpath, m_bzrRev);
       Change change = new Change(bcr, CurrentContentRevision.create(fpath), FileStatus.MODIFIED);
       CHANGES.debug(String.format("%10s \"%s\" => \"%s\"", "renamed", oldfpath, fpath));
       m_builder.processChange(change, m_vcsKey);

@@ -16,6 +16,7 @@
 package bazaar4idea.util;
 
 import bazaar4idea.BzrUtil;
+import bazaar4idea.command.BzrBinaryHandler;
 import bazaar4idea.command.BzrCommand;
 import bazaar4idea.command.BzrSimpleHandler;
 import bazaar4idea.repo.BzrRepository;
@@ -182,6 +183,25 @@ public class BzrFileUtils {
     }
     return nonIgnoredFiles;
   }
+
+  /**
+   * Get file content for the specific revision
+   *
+   * @param project      the project
+   * @param root         the vcs root
+   * @param revisionOrBranch     the revision to find path in or branch
+   * @param relativePath
+   * @return the content of file if file is found, null if the file is missing in the revision
+   * @throws VcsException if there is a problem with running git
+   */
+  public static byte[] getFileContent(Project project, VirtualFile root, String revisionOrBranch,
+                                      String relativePath) throws VcsException {
+    BzrBinaryHandler h = new BzrBinaryHandler(project, root, BzrCommand.SHOW);
+    h.setSilent(true);
+    h.addParameters(revisionOrBranch + ":" + relativePath);
+    return h.run();
+  }
+
 
   /**
    * Checks if two file paths are different only by case in a case insensitive OS.

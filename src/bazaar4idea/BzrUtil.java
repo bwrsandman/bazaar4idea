@@ -15,17 +15,27 @@
  */
 package bazaar4idea;
 
+import bazaar4idea.changes.BzrChangeUtils;
+import bazaar4idea.command.BzrHandler;
+import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.repo.BzrRepositoryManager;
+import bazaar4idea.util.BzrUIUtil;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vcs.AbstractVcsHelper;
 import com.intellij.openapi.vcs.FilePath;
+import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsException;
+import com.intellij.openapi.vcs.versionBrowser.CommittedChangeList;
 import com.intellij.openapi.vcs.vfs.AbstractVcsVirtualFile;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.ui.UIUtil;
 import com.intellij.vcsUtil.VcsUtil;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
 import org.jetbrains.annotations.NotNull;
@@ -33,12 +43,40 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
  * @author Patrick Woodworth
  */
 public class BzrUtil {
+
+  /**
+   * Comparator for virtual files by name
+   */
+  public static final Comparator<VirtualFile> VIRTUAL_FILE_COMPARATOR = new Comparator<VirtualFile>() {
+    public int compare(final VirtualFile o1, final VirtualFile o2) {
+      if (o1 == null && o2 == null) {
+        return 0;
+      }
+      if (o1 == null) {
+        return -1;
+      }
+      if (o2 == null) {
+        return 1;
+      }
+      return o1.getPresentableUrl().compareTo(o2.getPresentableUrl());
+    }
+  };
+
+  /**
+   * The UTF-8 encoding name
+   */
+  public static final String UTF8_ENCODING = "UTF-8";
+  /**
+   * The UTF8 charset
+   */
+  public static final Charset UTF8_CHARSET = Charset.forName(UTF8_ENCODING);
   public static final String DOT_BZR = ".bzr";
   private static final Logger LOG = Logger.getInstance(BzrUtil.class.getName());
   private static final Map<String,File> sm_rootFileCache = new WeakHashMap<String, File>();
@@ -206,25 +244,94 @@ public class BzrUtil {
     return BzrCoreUtil.relativePath(root, path);
   }
 
-  private static class UnusedUtil {
 
-//    /**
-//     * Return a bzr root for the file path (the parent directory with ".bzr" subdirectory)
-//     *
-//     * @param filePath a file path
-//     * @return bzr root for the file
-//     * @throws IllegalArgumentException if the file is not under bzr
-//     * @throws com.intellij.openapi.vcs.VcsException             if the file is not under bzr
-//     */
-//    private static VirtualFile getBzrRoot(final FilePath filePath) throws VcsException {
-//      VirtualFile root = getBzrRootOrNull(filePath);
-//      if (root != null) {
-//        return root;
-//      }
-//      throw new VcsException("The file " + filePath + " is not under bzr.");
-//    }
-//
-//
+  /**
+   * Return a Bazaar root for the file path (the parent directory with ".bzr" subdirectory)
+   *
+   * @param filePath a file path
+   * @return Bazaar root for the file
+   * @throws IllegalArgumentException if the file is not under Bazaar
+   * @throws VcsException             if the file is not under Bazaar
+   *
+   * @deprecated because uses the java.io.File.
+   * @use BzrRepositoryManager#getRepositoryForFile().
+   */
+    public static VirtualFile getBzrRoot(@NotNull FilePath filePath) throws VcsException {
+      VirtualFile root = getBzrRootOrNull(filePath);
+      if (root != null) {
+        return root;
+      }
+      throw new VcsException("The file " + filePath + " is not under bzr.");
+    }
+
+  /**
+   * Return a Bazaar root for the file (the parent directory with ".bzr" subdirectory)
+   *
+   * @param file the file to check
+   * @return Bazaar root for the file
+   * @throws VcsException if the file is not under Bazaar
+   *
+   * @deprecated because uses the java.io.File.
+   * @use BzrRepositoryManager#getRepositoryForFile().
+   */
+  public static VirtualFile getBzrRoot(@NotNull final VirtualFile file) throws VcsException {
+    final VirtualFile root = bzrRootOrNull(file);
+    if (root != null) {
+      return root;
+    }
+    else {
+      throw new VcsException("The file " + file.getPath() + " is not under git.");
+    }
+  }
+
+  /**
+   * Get Bazaar roots for the project. The method shows dialogs in the case when roots cannot be retrieved,
+   * so it should be called from the event dispatch thread.
+   *
+   * @param project the project
+   * @param vcs     the Bazaar Vcs
+   * @return the list of the roots
+   *
+   * @deprecated because uses the java.io.File.
+   * @use BzrRepositoryManager#getRepositoryForFile().
+   */
+  @NotNull
+  public static List<VirtualFile> getBzrRoots(Project project, BzrVcs vcs) throws VcsException {
+    final VirtualFile[] contentRoots = ProjectLevelVcsManager.getInstance(project).getRootsUnderVcs(vcs);
+    if (contentRoots == null || contentRoots.length == 0) {
+      throw new VcsException(BzrBundle.getString("repository.action.missing.roots.unconfigured.message"));
+    }
+    final List<VirtualFile> roots = new ArrayList<VirtualFile>(bzrRootsForPaths(Arrays.asList(contentRoots)));
+    if (roots.size() == 0) {
+      throw new VcsException(BzrBundle.getString("repository.action.missing.roots.misconfigured"));
+    }
+    Collections.sort(roots, VIRTUAL_FILE_COMPARATOR);
+    return roots;
+  }
+
+  /**
+   * Get Bazaar roots from content roots
+   *
+   * @param roots Bazaar content roots
+   * @return a content root
+   */
+  public static Set<VirtualFile> bzrRootsForPaths(final Collection<VirtualFile> roots) {
+    HashSet<VirtualFile> rc = new HashSet<VirtualFile>();
+    for (VirtualFile root : roots) {
+      VirtualFile f = root;
+      do {
+        if (f.findFileByRelativePath(DOT_BZR) != null) {
+          rc.add(f);
+          break;
+        }
+        f = f.getParent();
+      }
+      while (f != null);
+    }
+    return rc;
+  }
+
+  private static class UnusedUtil {
 //    /**
 //     * Return a bzr root for the file (the parent directory with ".bzr" subdirectory)
 //     *
@@ -493,6 +600,90 @@ public class BzrUtil {
       l.add(p);
     }
     return rc;
+  }
+
+  /**
+   * Show changes made in the specified revision.
+   *
+   * @param project     the project
+   * @param revision    the revision number
+   * @param file        the file affected by the revision
+   * @param local       pass true to let the diff be editable, i.e. making the revision "at the right" be a local (current) revision.
+   *                    pass false to let both sides of the diff be non-editable.
+   * @param revertable  pass true to let "Revert" action be active.
+   */
+  public static void showSubmittedFiles(final Project project, final String revision, final VirtualFile file,
+                                        final boolean local, final boolean revertable) {
+    new Task.Backgroundable(project, BzrBundle.message("changes.retrieving", revision)) {
+      public void run(@NotNull ProgressIndicator indicator) {
+        indicator.setIndeterminate(true);
+        try {
+          VirtualFile vcsRoot = getBzrRoot(file);
+          final CommittedChangeList changeList = BzrChangeUtils.getRevisionChanges(project, vcsRoot, revision, true,
+                                                                                   local, revertable);
+          if (changeList != null) {
+            UIUtil.invokeLaterIfNeeded(new Runnable() {
+              public void run() {
+                AbstractVcsHelper.getInstance(project).showChangesListBrowser(changeList,
+                        BzrBundle.message("paths.affected.title", revision));
+              }
+            });
+          }
+        }
+        catch (final VcsException e) {
+          UIUtil.invokeLaterIfNeeded(new Runnable() {
+            public void run() {
+              BzrUIUtil.showOperationError(project, e, "bzr show");
+            }
+          });
+        }
+      }
+    }.queue();
+  }
+
+  /**
+   * Return committer name based on author name and committer name
+   *
+   * @param authorName    the name of author
+   * @param committerName the name of committer
+   * @return just a name if they are equal, or name that includes both author and committer
+   */
+  public static String adjustAuthorName(final String authorName, String committerName) {
+    if (!authorName.equals(committerName)) {
+      //noinspection HardCodedStringLiteral
+      committerName = authorName + ", via " + committerName;
+    }
+    return committerName;
+  }
+
+  /**
+   * Parse UNIX timestamp as it is returned by the git
+   *
+   * @param value a value to parse
+   * @return timestamp as {@link Date} object
+   */
+  private static Date parseTimestamp(String value) {
+    final long parsed;
+    parsed = Long.parseLong(value.trim());
+    return new Date(parsed * 1000);
+  }
+
+  /**
+   * Parse UNIX timestamp returned from Git and handle {@link NumberFormatException} if one happens: return new {@link Date} and
+   * log the error properly.
+   * In some cases git output gets corrupted and this method is intended to catch the reason, why.
+   * @param value      Value to parse.
+   * @param handler    Git handler that was called to received the output.
+   * @param gitOutput  Git output.
+   * @return Parsed Date or <code>new Date</code> in the case of error.
+   */
+  public static Date parseTimestampWithNFEReport(String value, BzrHandler handler, String gitOutput) {
+    try {
+      return parseTimestamp(value);
+    } catch (NumberFormatException e) {
+      LOG.error("annotate(). NFE. Handler: " + handler + ". Output: " + gitOutput, e);
+      return  new Date();
+    }
   }
 
 }

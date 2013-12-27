@@ -101,6 +101,6 @@ public class BzrDiffProvider implements DiffProvider {
 //        if (hgRevisionNumber.isWorkingVersion()) {
 //            throw new IllegalStateException("Should not compare against working copy");
 //        }
-    return BzrContentRevision.createBzrContentRevision(project, vcsRoot, file, hgRevisionNumber);
+    return BzrContentRevision.createRevision(project, vcsRoot, file, hgRevisionNumber);
   }
 }
