@@ -135,7 +135,7 @@ public class BzrUIUtil {
     notifyMessage(project, title, description, NotificationType.ERROR, true, null);
   }
 
-  public static void notifyGitErrors(Project project, String title, String description, Collection<VcsException> gitErrors) {
+  public static void notifyBzrErrors(Project project, String title, String description, Collection<VcsException> gitErrors) {
     StringBuilder content = new StringBuilder();
     if (!StringUtil.isEmptyOrSpaces(description)) {
       content.append(description);

@@ -25,6 +25,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 /**
  * @author Kirill Likhodedov
  */
@@ -34,6 +36,7 @@ public class BzrRepositoryImpl extends RepositoryImpl implements BzrRepository, 
 //  @NotNull private final BzrRepositoryReader myReader;
   @NotNull private final VirtualFile myBzrDir;
   @Nullable private final BzrUntrackedFilesHolder myUntrackedFilesHolder;
+  @NotNull private volatile BzrRepoInfo myInfo;
 
   protected BzrRepositoryImpl(@NotNull VirtualFile rootDir, @NotNull BzrPlatformFacade facade, @NotNull Project project,
                               @NotNull Disposable parentDisposable, final boolean light) {
@@ -89,6 +92,12 @@ public class BzrRepositoryImpl extends RepositoryImpl implements BzrRepository, 
       throw new IllegalStateException("Using untracked files holder with light bzr repository instance " + this);
     }
     return myUntrackedFilesHolder;
+  }
+
+  @Override
+  @NotNull
+  public Collection<BzrRemote> getRemotes() {
+    return myInfo.getRemotes();
   }
 
 }

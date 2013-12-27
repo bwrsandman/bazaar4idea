@@ -28,15 +28,15 @@ import java.io.File;
  * 
  * @author Kirill Likhodedov
  */
-public class BzrLineHandlerPasswordRequestAware extends BzrLineHandler {
+public class GitLineHandlerPasswordRequestAware extends BzrLineHandler {
   
   private boolean myAuthRequest;
 
-  public BzrLineHandlerPasswordRequestAware(@NotNull Project project, @NotNull VirtualFile vcsRoot, @NotNull BzrCommand command) {
+  public GitLineHandlerPasswordRequestAware(@NotNull Project project, @NotNull VirtualFile vcsRoot, @NotNull BzrCommand command) {
     super(project, vcsRoot, command);
   }
 
-  public BzrLineHandlerPasswordRequestAware(@NotNull Project project, @NotNull File directory, @NotNull BzrCommand clone) {
+  public GitLineHandlerPasswordRequestAware(@NotNull Project project, @NotNull File directory, @NotNull BzrCommand clone) {
     super(project, directory, clone);
   }
 

@@ -15,9 +15,6 @@
  */
 package bazaar4idea.command;
 
-import bazaar4idea.command.Bzr;
-import bazaar4idea.command.BzrCommandResult;
-import bazaar4idea.command.BzrLineHandlerListener;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -28,7 +25,6 @@ import com.intellij.vcsUtil.VcsFileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,8 +75,8 @@ public class BzrImpl implements Bzr {
 
     handler.runInCurrentThread(null);
 
-    if (handler instanceof BzrLineHandlerPasswordRequestAware &&
-        ((BzrLineHandlerPasswordRequestAware)handler).hadAuthRequest()) {
+    if (handler instanceof GitLineHandlerPasswordRequestAware &&
+        ((GitLineHandlerPasswordRequestAware)handler).hadAuthRequest()) {
       errorOutput.add("Authentication failed");
     }
 

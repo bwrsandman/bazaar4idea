@@ -19,6 +19,8 @@ import com.intellij.dvcs.repo.Repository;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+
 public interface BzrRepository extends Repository {
 
   @NotNull
@@ -26,5 +28,17 @@ public interface BzrRepository extends Repository {
 
   @NotNull
   BzrUntrackedFilesHolder getUntrackedFilesHolder();
+
+  /**
+   * Returns remotes defined in this Bazaar repository.
+   * It is different from {@link BzrConfig#getRemotes()} because remotes may be defined not only in {@code .git/config},
+   * but in {@code .git/remotes/} or even {@code .git/branches} as well.
+   * On the other hand, it is a very old way to define remotes and we are not going to implement this until needed.
+   * See <a href="http://thread.gmane.org/gmane.comp.version-control.git/182960">discussion in the Git mailing list</a> that confirms
+   * that remotes a defined in {@code .git/config} only nowadays.
+   * @return GitRemotes defined for this repository.
+   */
+  @NotNull
+  Collection<BzrRemote> getRemotes();
 
 }

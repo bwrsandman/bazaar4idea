@@ -18,6 +18,8 @@ package bazaar4idea;
 import bazaar4idea.changes.BzrChangeUtils;
 import bazaar4idea.command.BzrHandler;
 import bazaar4idea.i18n.BzrBundle;
+import bazaar4idea.repo.BzrRemote;
+import bazaar4idea.repo.BzrRepository;
 import bazaar4idea.repo.BzrRepositoryManager;
 import bazaar4idea.util.BzrUIUtil;
 import com.intellij.openapi.components.ServiceManager;
@@ -600,6 +602,19 @@ public class BzrUtil {
       l.add(p);
     }
     return rc;
+  }
+
+  @Nullable
+  public static BzrRemote findRemoteByName(@NotNull BzrRepository repository, @Nullable String name) {
+    if (name == null) {
+      return null;
+    }
+    for (BzrRemote remote : repository.getRemotes()) {
+      if (remote.getName().equals(name)) {
+        return remote;
+      }
+    }
+    return null;
   }
 
   /**

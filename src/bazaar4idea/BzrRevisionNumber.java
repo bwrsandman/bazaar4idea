@@ -34,8 +34,8 @@ public final class BzrRevisionNumber implements VcsRevisionNumber {
     return new BzrRevisionNumber(revision);
   }
 
-  private BzrRevisionNumber(@NotNull String rev) {
-    m_rev = rev;
+  public BzrRevisionNumber(@NonNls @NotNull String version) {
+    m_rev = version;
 //    if (rev.length() > 0 && rev.indexOf(':') < 0) {
 //      m_rev = "revno:" + m_rev;
 //    }
