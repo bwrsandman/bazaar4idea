@@ -22,6 +22,8 @@ import bazaar4idea.repo.BzrRemote;
 import bazaar4idea.repo.BzrRepository;
 import bazaar4idea.repo.BzrRepositoryManager;
 import bazaar4idea.util.BzrUIUtil;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -333,6 +335,21 @@ public class BzrUtil {
     return rc;
   }
 
+  @NotNull
+  public static Collection<BzrRepository> getRepositoriesForFiles(@NotNull Project project,
+                                                                  @NotNull Collection<VirtualFile> files) {
+    final BzrRepositoryManager manager = getRepositoryManager(project);
+    com.google.common.base.Function<VirtualFile, BzrRepository> ROOT_TO_REPO =
+            new com.google.common.base.Function<VirtualFile, BzrRepository>() {
+              @Override
+              public BzrRepository apply(@Nullable VirtualFile root) {
+                return root != null ? manager.getRepositoryForRoot(root) : null;
+              }
+            };
+    return Collections2.filter(Collections2.transform(sortFilesByBzrRootsIgnoringOthers(files).keySet(), ROOT_TO_REPO),
+            Predicates.notNull());
+  }
+
   private static class UnusedUtil {
 //    /**
 //     * Return a bzr root for the file (the parent directory with ".bzr" subdirectory)
@@ -554,6 +571,17 @@ public class BzrUtil {
    */
   public static Map<VirtualFile, List<FilePath>> sortFilePathsByBzrRoot(final Collection<FilePath> files) throws VcsException {
     return sortFilePathsByBzrRoot(files, false);
+  }
+
+  @NotNull
+  public static Map<VirtualFile, List<VirtualFile>> sortFilesByBzrRootsIgnoringOthers(@NotNull Collection<VirtualFile> files) {
+    try {
+      return sortFilesByBzrRoot(files, true);
+    }
+    catch (VcsException e) {
+      LOG.error("Should never happen, since we passed 'ignore non-Bazaar' parameter", e);
+      return Collections.emptyMap();
+    }
   }
 
   /**

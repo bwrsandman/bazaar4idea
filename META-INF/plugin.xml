@@ -73,7 +73,7 @@
       <action id="Bazaar.Pull" class="bazaar4idea.action.BzrPull" text="Pull..." icon="AllIcons.Actions.CheckOut"/>
       <action id="Bazaar.Push" class="bazaar4idea.action.BzrPush" text="Push..." icon="AllIcons.Actions.Commit"/>
       <separator/>
-      <!--<action id="bzr4intellij.run.conflict.resolver" class="bazaar4idea.action.BzrRunConflictResolverAction"
+      <!--<action id="bzr4intellij.run.conflict.resolver" class="bazaar4idea.action.BzrResolveConflicts"
               text="Run Conflict Resolver"/>-->
       <!--
       <action id="Git.Rebase" class="git4idea.actions.GitRebase" text="Rebase..."/>
