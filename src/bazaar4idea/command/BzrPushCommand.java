@@ -19,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.emergent.bzr4j.core.cli.BzrStandardResult;
 import bazaar4idea.BzrVcs;
 import bazaar4idea.data.BzrUrl;
-import bazaar4idea.ui.BzrUsernamePasswordDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URISyntaxException;
@@ -53,22 +52,22 @@ public class BzrPushCommand {
     arguments.add(destination);
     BzrStandardResult result = ShellCommandService.getInstance(project).execute2(repo, "push", arguments);
     if (BzrErrorUtil.isAbort(result) && BzrErrorUtil.isAuthorizationRequiredAbort(result)) {
-      try {
-        BzrUrl hgUrl = new BzrUrl(destination);
-        if (hgUrl.supportsAuthentication()) {
-          BzrUsernamePasswordDialog dialog = new BzrUsernamePasswordDialog(project);
-          dialog.setUsername(hgUrl.getUsername());
-          dialog.show();
-          if (dialog.isOK()) {
-            hgUrl.setUsername(dialog.getUsername());
-            hgUrl.setPassword(String.valueOf(dialog.getPassword()));
-            arguments.set(arguments.size() - 1, hgUrl.asString());
-            result = ShellCommandService.getInstance(project).execute2(repo, "push", arguments);
-          }
-        }
-      } catch (URISyntaxException e) {
-        VcsImplUtil.showErrorMessage(project, "Invalid destination: " + destination, "Error");
-      }
+//      try {
+//        BzrUrl hgUrl = new BzrUrl(destination);
+//        if (hgUrl.supportsAuthentication()) {
+//          BzrUsernamePasswordDialog dialog = new BzrUsernamePasswordDialog(project);
+//          dialog.setUsername(hgUrl.getUsername());
+//          dialog.show();
+//          if (dialog.isOK()) {
+//            hgUrl.setUsername(dialog.getUsername());
+//            hgUrl.setPassword(String.valueOf(dialog.getPassword()));
+//            arguments.set(arguments.size() - 1, hgUrl.asString());
+//            result = ShellCommandService.getInstance(project).execute2(repo, "push", arguments);
+//          }
+//        }
+//      } catch (URISyntaxException e) {
+//        VcsImplUtil.showErrorMessage(project, "Invalid destination: " + destination, "Error");
+//      }
     }
 
     project.getMessageBus().syncPublisher(BzrVcs.OUTGOING_TOPIC).update(project);
