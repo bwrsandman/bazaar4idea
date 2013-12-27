@@ -17,8 +17,8 @@ package bazaar4idea.action;
 
 import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.command.Bzr;
-import bazaar4idea.command.BzrCommandResult;
+import bazaar4idea.commands.Bzr;
+import bazaar4idea.commands.BzrCommandResult;
 import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.util.BzrUIUtil;
 import com.intellij.notification.NotificationType;

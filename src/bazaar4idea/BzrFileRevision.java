@@ -9,7 +9,7 @@ import com.intellij.openapi.vcs.impl.ContentRevisionCache;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.emergent.bzr4j.core.utils.StringUtil;
-import bazaar4idea.command.BzrCatCommand;
+import bazaar4idea.commands.BzrCatCommand;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

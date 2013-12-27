@@ -23,8 +23,8 @@ import com.intellij.util.Consumer;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
-import bazaar4idea.command.BzrLogCommand;
-import bazaar4idea.command.BzrMiscCommand;
+import bazaar4idea.commands.BzrLogCommand;
+import bazaar4idea.commands.BzrMiscCommand;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

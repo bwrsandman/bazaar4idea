@@ -26,8 +26,8 @@ import org.apache.commons.io.IOUtils;
 import bazaar4idea.BzrFile;
 import bazaar4idea.BzrRevisionNumber;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.command.BzrCatCommand;
-import bazaar4idea.command.BzrResolveCommand;
+import bazaar4idea.commands.BzrCatCommand;
+import bazaar4idea.commands.BzrResolveCommand;
 import bazaar4idea.data.BzrResolveStatusEnum;
 import org.jetbrains.annotations.NotNull;
 

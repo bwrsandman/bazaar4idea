@@ -15,38 +15,25 @@
  */
 package bazaar4idea.push;
 
-import bazaar4idea.BzrCommit;
 import bazaar4idea.BzrPlatformFacade;
 import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.command.Bzr;
+import bazaar4idea.commands.Bzr;
 import bazaar4idea.config.BzrConfigUtil;
 import bazaar4idea.config.BzrVcsSettings;
 import bazaar4idea.config.UpdateMethod;
-import bazaar4idea.repo.BzrRemote;
 import bazaar4idea.repo.BzrRepository;
 import bazaar4idea.repo.BzrRepositoryManager;
-import bazaar4idea.ui.BzrPushDialog;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.update.UpdatedFiles;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Collects information to push and performs the push.
@@ -314,7 +301,7 @@ public final class BzrPusher {
 //    BzrRemote remote = pushSpec.getRemote();
 //    Collection<String> pushUrls = remote.getPushUrls();
 //    if (pushUrls.isEmpty()) {
-//      LOG.error("No urls or pushUrls are defined for " + remote);
+//      log.error("No urls or pushUrls are defined for " + remote);
 //      return BzrSimplePushResult.error("There are no URLs defined for remote " + remote.getName());
 //    }
 //    String url = pushUrls.iterator().next();
@@ -349,7 +336,7 @@ public final class BzrPusher {
 //        }
 //      }
 //      catch (VcsException e) {
-//        LOG.error(String.format("Couldn't set up tracking for source branch %s, target branch %s, remote %s in root %s",
+//        log.error(String.format("Couldn't set up tracking for source branch %s, target branch %s, remote %s in root %s",
 //                                source, dest, remote, repository), e);
 //        Notificator.getInstance(project).notify(BzrVcs.NOTIFICATION_GROUP_ID, "", "Couldn't set up branch tracking",
 //                                                        NotificationType.ERROR);
@@ -380,7 +367,7 @@ public final class BzrPusher {
 //      destName = destWithRemote.substring(prefix.length());
 //    }
 //    else {
-//      LOG.error("Destination remote branch has invalid name. Remote branch name: " + destWithRemote + "\nRemote: " + remote);
+//      log.error("Destination remote branch has invalid name. Remote branch name: " + destWithRemote + "\nRemote: " + remote);
 //      destName = destWithRemote;
 //    }
 //    return spec.getSource().getName() + ":" + destName;
@@ -469,7 +456,7 @@ public final class BzrPusher {
 //
 //      if (pushAttempt <= MAX_PUSH_ATTEMPTS && !rejectedPushesForCurrentBranch.isEmpty()) {
 //
-//        LOG.info(
+//        log.info(
 //          String.format("Rejected pushes for current branches: %n%s%nUpdate settings: %s", rejectedPushesForCurrentBranch, updateSettings));
 //
 //        if (updateSettings == null) {

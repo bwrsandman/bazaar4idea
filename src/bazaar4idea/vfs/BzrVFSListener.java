@@ -17,7 +17,7 @@ package bazaar4idea.vfs;
 
 import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
-import bazaar4idea.command.Bzr;
+import bazaar4idea.commands.Bzr;
 import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.util.BzrFileUtils;
 import com.intellij.openapi.progress.ProgressIndicator;

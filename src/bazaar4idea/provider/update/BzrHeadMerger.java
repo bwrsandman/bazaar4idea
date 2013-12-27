@@ -26,9 +26,9 @@ import org.emergent.bzr4j.core.xmloutput.GenericChange;
 import org.emergent.bzr4j.core.xmloutput.XmlOutputHandler;
 import bazaar4idea.BzrVcs;
 import bazaar4idea.i18n.BzrBundle;
-import bazaar4idea.command.BzrIdeaExec;
-import bazaar4idea.command.BzrMergeCommand;
-import bazaar4idea.command.ShellCommandService;
+import bazaar4idea.commands.BzrIdeaExec;
+import bazaar4idea.commands.BzrMergeCommand;
+import bazaar4idea.commands.ShellCommandService;
 
 import java.io.File;
 
@@ -99,7 +99,7 @@ final class BzrHeadMerger {
 
           if (fileGroupId != null) {
             String filePath = (new File(workDir, change.m_path)).getAbsolutePath();
-//            LOG.debug("adding updatedFile: " + fileGroupId + " " + filePath);
+//            log.debug("adding updatedFile: " + fileGroupId + " " + filePath);
             updatedFiles.getGroupById(fileGroupId).add(filePath, BzrVcs.NAME, vcsRevNo);
           }
         }

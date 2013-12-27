@@ -68,7 +68,7 @@ public class BzrErrorReportSubmitter extends ErrorReportSubmitter {
 //  private final Timer sm_timer = new Timer("BzrErrorReportSubmitter timer", true);
 
   public BzrErrorReportSubmitter() {
-//    LOG.debug("init()");
+//    log.debug("init()");
   }
 
   @Override

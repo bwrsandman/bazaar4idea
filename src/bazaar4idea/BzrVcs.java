@@ -16,7 +16,7 @@
 
 package bazaar4idea;
 
-import bazaar4idea.command.Bzr;
+import bazaar4idea.commands.Bzr;
 import bazaar4idea.config.BzrExecutableDetector;
 import bazaar4idea.config.BzrExecutableValidator;
 import bazaar4idea.config.BzrVcsApplicationSettings;
@@ -27,6 +27,7 @@ import bazaar4idea.vfs.BzrVFSListener;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.impl.NotificationsConfigurationImpl;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
@@ -100,11 +101,16 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
           "Bazaar Messages", ChangesViewContentManager.TOOLWINDOW_ID, true);
   public static final NotificationGroup IMPORTANT_ERROR_NOTIFICATION = new NotificationGroup(
           "Bazaar Important Messages", NotificationDisplayType.STICKY_BALLOON, true);
+  public static final NotificationGroup MINOR_NOTIFICATION = new NotificationGroup(
+          "Bazaar Minor Notifications", NotificationDisplayType.BALLOON, true);
 
-  static final Logger LOG = Logger.getInstance(BzrVcs.class.getName());
+  static {
+    NotificationsConfigurationImpl.remove("Bazaar");
+  }
 
   public static final String NAME = "Bazaar";
 
+  public static final Logger log = Logger.getInstance(BzrVcs.class.getName());
   private final static VcsKey ourKey = createKey(NAME);
 
   public static final Topic<BzrUpdater> BRANCH_TOPIC = new Topic<BzrUpdater>("bzr4intellij.branch", BzrUpdater.class);
@@ -167,7 +173,11 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   private final @NotNull BzrPlatformFacade myPlatformFacade;
   private BzrVFSListener myVFSListener; // a VFS listener that tracks file addition, deletion, and renaming.
 
-  public static BzrVcs getInstance(@NotNull Project project) {
+  @Nullable
+  public static BzrVcs getInstance(Project project) {
+    if (project == null || project.isDisposed()) {
+      return null;
+    }
     return (BzrVcs)ProjectLevelVcsManager.getInstance(project).findVcsByName(NAME);
   }
 
@@ -225,7 +235,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
       return retval;
     }
     finally {
-      LOG.debug("parseRevisionNumber: " + String.valueOf(retval));
+      log.debug("parseRevisionNumber: " + String.valueOf(retval));
     }
   }
 
@@ -319,7 +329,7 @@ public class BzrVcs extends AbstractVcs<CommittedChangeList> implements Disposab
   public <S> List<S> filterUniqueRoots(final List<S> in, final Convertor<S, VirtualFile> convertor) {
     if (!BzrDebug.ROOT_REMAPPING_ENABLED)
       return super.filterUniqueRoots(in, convertor);
-    LOG.debug("BzrVcs.filterUniqueRoots");
+    log.debug("BzrVcs.filterUniqueRoots");
     Collections.sort(in, new ComparatorDelegate<S, VirtualFile>(convertor, FilePathComparator.getInstance()));
 
     for (int i = 1; i < in.size(); i++) {

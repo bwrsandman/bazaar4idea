@@ -18,12 +18,8 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.emergent.bzr4j.core.cli.BzrStandardResult;
-import bazaar4idea.command.BzrPushCommand;
-import bazaar4idea.ui.BzrPushDialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 

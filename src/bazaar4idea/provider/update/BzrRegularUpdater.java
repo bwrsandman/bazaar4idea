@@ -24,7 +24,7 @@ import bazaar4idea.BzrRevisionNumber;
 import bazaar4idea.BzrUtil;
 import bazaar4idea.BzrVcs;
 import bazaar4idea.i18n.BzrBundle;
-import bazaar4idea.command.BzrUpdateCommand;
+import bazaar4idea.commands.BzrUpdateCommand;
 
 import java.io.File;
 import java.util.List;
@@ -153,7 +153,7 @@ class BzrRegularUpdater implements BzrUpdater {
 //    try {
 //      result.validate( null, Arrays.asList("update") );
 //    } catch (Exception e) {
-//      LOG.debug(e);
+//      log.debug(e);
 //    }
     return result;
   }

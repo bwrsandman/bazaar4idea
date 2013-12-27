@@ -27,7 +27,7 @@ import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.emergent.bzr4j.core.utils.BzrCoreUtil;
 import bazaar4idea.BzrGlobalSettings;
-import bazaar4idea.command.ShellCommandService;
+import bazaar4idea.commands.ShellCommandService;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -170,7 +170,7 @@ public class BzrConfigurationIdePanel implements Disposable {
           try {
             validateExePath();
           } catch (Throwable ignored) {
-//            LOG.debug(ignored);
+//            log.debug(ignored);
           }
         }
       });

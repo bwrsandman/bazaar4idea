@@ -18,22 +18,19 @@ package bazaar4idea.changes;
 import bazaar4idea.BzrContentRevision;
 import bazaar4idea.BzrRevisionNumber;
 import bazaar4idea.BzrUtil;
-import bazaar4idea.command.BzrCommand;
-import bazaar4idea.command.BzrHandler;
-import bazaar4idea.command.BzrSimpleHandler;
+import bazaar4idea.commands.BzrCommand;
+import bazaar4idea.commands.BzrHandler;
+import bazaar4idea.commands.BzrSimpleHandler;
 import bazaar4idea.util.StringScanner;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.FileStatus;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -251,7 +248,7 @@ public class BzrChangeUtils {
 
 //  @Nullable
 //  public static String getCommitAbbreviation(final Project project, final VirtualFile root, final SHAHash hash) {
-//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.LOG);
+//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.log);
 //    h.setSilent(true);
 //    h.addParameters("--max-count=1", "--pretty=%h", "--encoding=UTF-8", "\"" + hash.getValue() + "\"", "--");
 //    try {
@@ -267,7 +264,7 @@ public class BzrChangeUtils {
 //  @Nullable
 //  public static SHAHash commitExists(final Project project, final VirtualFile root, final String anyReference,
 //                                     List<VirtualFile> paths, final String... parameters) {
-//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.LOG);
+//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.log);
 //    h.setSilent(true);
 //    h.addParameters(parameters);
 //    h.addParameters("--max-count=1", "--pretty=%H", "--encoding=UTF-8", anyReference, "--");
@@ -301,7 +298,7 @@ public class BzrChangeUtils {
 //
 //  @Nullable
 //  public static List<AbstractHash> commitExistsByComment(final Project project, final VirtualFile root, final String anyReference) {
-//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.LOG);
+//    GitSimpleHandler h = new GitSimpleHandler(project, root, GitCommand.log);
 //    h.setSilent(true);
 //    String escaped = StringUtil.escapeQuotes(anyReference);
 //    escaped = StringUtil.escapeSlashes(escaped);
@@ -407,7 +404,7 @@ public class BzrChangeUtils {
 //  public static Collection<Change> getDiff(@NotNull Project project, @NotNull VirtualFile root,
 //                                           @Nullable String oldRevision, @Nullable String newRevision,
 //                                           @Nullable Collection<FilePath> dirtyPaths) throws VcsException {
-//    LOG.assertTrue(oldRevision != null || newRevision != null, "Both old and new revisions can't be null");
+//    log.assertTrue(oldRevision != null || newRevision != null, "Both old and new revisions can't be null");
 //    String range;
 //    GitRevisionNumber newRev;
 //    GitRevisionNumber oldRev;

@@ -9,7 +9,7 @@ import com.intellij.openapi.vcs.merge.MergeProvider;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsRunnable;
 import com.intellij.vcsUtil.VcsUtil;
-import bazaar4idea.command.BzrResolveCommand;
+import bazaar4idea.commands.BzrResolveCommand;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

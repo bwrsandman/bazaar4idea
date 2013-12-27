@@ -45,7 +45,7 @@ public class BzrRootConverter implements AbstractVcs.RootsConvertor {
     HashSet<VirtualFile> listed = new HashSet<VirtualFile>();
     for (VirtualFile f : result) {
       VirtualFile r = BzrUtil.bzrRootOrNull(f);
-//      BzrVcs.LOG.debug(String.format("RootConversion: \"%s\" => \"%s\"", f, r));
+//      BzrVcs.log.debug(String.format("RootConversion: \"%s\" => \"%s\"", f, r));
       if (r != null && listed.add(r)) {
         roots.add(r);
       }

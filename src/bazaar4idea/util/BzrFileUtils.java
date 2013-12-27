@@ -16,9 +16,9 @@
 package bazaar4idea.util;
 
 import bazaar4idea.BzrUtil;
-import bazaar4idea.command.BzrBinaryHandler;
-import bazaar4idea.command.BzrCommand;
-import bazaar4idea.command.BzrSimpleHandler;
+import bazaar4idea.commands.BzrBinaryHandler;
+import bazaar4idea.commands.BzrCommand;
+import bazaar4idea.commands.BzrSimpleHandler;
 import bazaar4idea.repo.BzrRepository;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;

@@ -24,7 +24,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
 import bazaar4idea.i18n.BzrBundle;
-import bazaar4idea.command.BzrRevertCommand;
+import bazaar4idea.commands.BzrRevertCommand;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;

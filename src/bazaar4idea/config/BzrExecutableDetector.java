@@ -291,7 +291,7 @@ public class BzrExecutableDetector {
 //        return new BzrVersion(major, parseOrNull(m.group(2)), parseOrNull(m.group(3)), parseOrNull(m.group(4)));
 //      }
 //      catch (NumberFormatException e) {
-//        LOG.info("Unexpected NFE when parsing [" + name + "]", e);
+//        log.info("Unexpected NFE when parsing [" + name + "]", e);
 //        return null;
 //      }
 //    }

@@ -16,9 +16,9 @@
 package bazaar4idea.ui;
 
 import bazaar4idea.BzrUtil;
-import bazaar4idea.command.BzrCommand;
-import bazaar4idea.command.BzrHandlerUtil;
-import bazaar4idea.command.BzrSimpleHandler;
+import bazaar4idea.commands.BzrCommand;
+import bazaar4idea.commands.BzrHandlerUtil;
+import bazaar4idea.commands.BzrSimpleHandler;
 import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.repo.BzrRepositoryManager;
 import bazaar4idea.util.BzrUIUtil;
@@ -30,19 +30,13 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.DocumentAdapter;
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NonNls;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

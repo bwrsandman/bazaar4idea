@@ -134,7 +134,7 @@ public final class BzrRemote implements Comparable<BzrRemote> {
     return myName.equals(bzrRemote.myName);
 
     // other parameters don't count: remotes are equal if their names are equal
-    // TODO: LOG.warn if other parameters differ
+    // TODO: log.warn if other parameters differ
   }
 
   @Override

@@ -16,7 +16,7 @@
 package bazaar4idea;
 
 import bazaar4idea.changes.BzrChangeUtils;
-import bazaar4idea.command.BzrHandler;
+import bazaar4idea.commands.BzrHandler;
 import bazaar4idea.i18n.BzrBundle;
 import bazaar4idea.repo.BzrRemote;
 import bazaar4idea.repo.BzrRepository;
@@ -427,7 +427,7 @@ public class BzrUtil {
 //      for (Project project : ProjectManager.getInstance().getOpenProjects()) {
 //        AbstractVcs vcs = ProjectLevelVcsManager.getInstance(project).getVcsFor(file);
 //        if (vcs instanceof BzrVcs) {
-//          LOG.debug(String.format("Found BzrVcs for file %s: %s", file, vcs));
+//          log.debug(String.format("Found BzrVcs for file %s: %s", file, vcs));
 //          return (BzrVcs)vcs;
 //        }
 //      }
@@ -440,10 +440,10 @@ public class BzrUtil {
 //      final List<VirtualFile> toRefreshDirs = new ArrayList<VirtualFile>();
 //      for (VirtualFile file : myFilesToRefresh) {
 //        if (file.isDirectory()) {
-//          LOG.debug("Gonna refresh: " + file.getName());
+//          log.debug("Gonna refresh: " + file.getName());
 //          toRefreshDirs.add(file);
 //        } else {
-//          LOG.debug("Gonna refresh: " + file.getName());
+//          log.debug("Gonna refresh: " + file.getName());
 //          toRefreshFiles.add(file);
 //        }
 //      }
@@ -469,7 +469,7 @@ public class BzrUtil {
 //      for (Iterator<VirtualFile> iterator = files.iterator(); iterator.hasNext();) {
 //        final VirtualFile file = iterator.next();
 //        if (!file.isValid()) {
-//          LOG.info("Refresh root is not valid: " + file.getPath());
+//          log.info("Refresh root is not valid: " + file.getPath());
 //          iterator.remove();
 //        }
 //      }

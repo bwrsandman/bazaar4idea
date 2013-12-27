@@ -18,7 +18,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsRoot;
-import bazaar4idea.command.BzrIncomingCommand;
+import bazaar4idea.commands.BzrIncomingCommand;
 import bazaar4idea.ui.BzrChangesetStatus;
 import org.jetbrains.annotations.NotNull;
 

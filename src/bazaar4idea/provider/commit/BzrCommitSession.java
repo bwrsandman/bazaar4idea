@@ -23,8 +23,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsImplUtil;
 import com.intellij.vcsUtil.VcsUtil;
 import org.apache.commons.lang.StringUtils;
-import bazaar4idea.command.BzrCommandException;
-import bazaar4idea.command.BzrCommitCommand;
+import bazaar4idea.commands.BzrCommandException;
+import bazaar4idea.commands.BzrCommitCommand;
 
 import javax.swing.*;
 import java.util.Collection;

@@ -36,11 +36,11 @@ import com.intellij.openapi.vfs.VirtualFileMoveEvent;
 import com.intellij.openapi.vfs.VirtualFilePropertyEvent;
 import com.intellij.util.ThrowableConsumer;
 import com.intellij.vcsUtil.VcsUtil;
-import bazaar4idea.command.BzrAddCommand;
-import bazaar4idea.command.BzrFileIdCommand;
-import bazaar4idea.command.BzrMiscCommand;
-import bazaar4idea.command.BzrMoveCommand;
-import bazaar4idea.command.BzrRemoveCommand;
+import bazaar4idea.commands.BzrAddCommand;
+import bazaar4idea.commands.BzrFileIdCommand;
+import bazaar4idea.commands.BzrMiscCommand;
+import bazaar4idea.commands.BzrMoveCommand;
+import bazaar4idea.commands.BzrRemoveCommand;
 
 import java.io.File;
 import java.io.IOException;

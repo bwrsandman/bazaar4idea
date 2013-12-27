@@ -16,7 +16,7 @@
 package bazaar4idea.repo;
 
 import bazaar4idea.BzrUtil;
-import bazaar4idea.command.Bzr;
+import bazaar4idea.commands.Bzr;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;

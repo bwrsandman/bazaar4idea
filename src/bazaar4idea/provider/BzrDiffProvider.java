@@ -23,7 +23,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrContentRevision;
 import bazaar4idea.BzrRevisionNumber;
-import bazaar4idea.command.BzrMiscCommand;
+import bazaar4idea.commands.BzrMiscCommand;
 
 public class BzrDiffProvider implements DiffProvider {
 

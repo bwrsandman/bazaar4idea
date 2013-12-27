@@ -28,9 +28,9 @@ import com.intellij.util.NullableFunction;
 import com.intellij.util.PairConsumer;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
-import bazaar4idea.command.BzrAddCommand;
-import bazaar4idea.command.BzrCommandException;
-import bazaar4idea.command.BzrCommitCommand;
+import bazaar4idea.commands.BzrAddCommand;
+import bazaar4idea.commands.BzrCommandException;
+import bazaar4idea.commands.BzrCommitCommand;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

@@ -21,8 +21,8 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import bazaar4idea.BzrFile;
-import bazaar4idea.command.BzrAnnotateCommand;
-import bazaar4idea.command.BzrLogCommand;
+import bazaar4idea.commands.BzrAnnotateCommand;
+import bazaar4idea.commands.BzrLogCommand;
 
 public class BzrAnnotationProvider implements AnnotationProvider {
 

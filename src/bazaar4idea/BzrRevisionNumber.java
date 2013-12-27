@@ -1,7 +1,7 @@
 package bazaar4idea;
 
-import bazaar4idea.command.BzrCommand;
-import bazaar4idea.command.BzrSimpleHandler;
+import bazaar4idea.commands.BzrCommand;
+import bazaar4idea.commands.BzrSimpleHandler;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsException;
